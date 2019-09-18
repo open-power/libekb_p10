@@ -96,8 +96,7 @@ BUILT_SOURCES = \
 	$(ERROR_INFO_DIR)/hwp_error_info.H
 
 if BUILD_DB
-libekb_p10dir = @datadir@/libekb/
-libekb_p10_DATA = p10_attributes.db
+data_DATA = p10_attributes.db
 endif
 
 include Makefile.proc.am
