@@ -1,0 +1,111 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: hwpf/fapi2/include/return_code_defs.H $                       */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2012,2017                                                    */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file return_code.H
+ * @brief definitions for fapi2 return codes
+ */
+
+#ifndef __FAPI2_RETURN_CODE_DEFS_
+#define __FAPI2_RETURN_CODE_DEFS_
+
+#include <stdint.h>
+
+///
+/// @brief Set HWP Error macro
+///
+/// This macro should be used by a HWP to create an error. The ReturnCode's
+/// internal return code is set and any error information in the Error XML file
+/// is added to the ReturnCode
+///
+#define FAPI_SET_HWP_ERROR(RC, ERROR)
+
+///
+/// @brief Add info to HWP Error macro
+///
+/// This macro should be used by an FFDC HWP to add error information from an
+/// Error XML file to an existing error.
+///
+#define FAPI_ADD_INFO_TO_HWP_ERROR(RC, ERROR)
+
+namespace fapi2
+{
+///
+/// @brief Enumeration of return codes
+///
+enum ReturnCodes : uint32_t
+{
+    ///< Success
+    FAPI2_RC_SUCCESS = 0,
+
+    // Flag bits indicating which code generated the error.
+    FAPI2_RC_FAPI2_MASK = 0x04000000, ///< FAPI2 mask
+    FAPI2_RC_PLAT_MASK =  0x02000000, ///< Platform mask
+    FAPI2_RC_HWP_MASK =   0x00000000, ///< HWP mask
+
+    //
+    // FAPI generated return codes
+    //
+
+    FAPI2_RC_INVALID_ATTR_GET            = FAPI2_RC_FAPI2_MASK | 0x01,
+    ///< Initfile requested an attribute with an invalid attribute ID
+
+    FAPI2_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI2_RC_FAPI2_MASK | 0x02,
+    ///< HWP requested a chip EC feature with an invalid attribute ID
+
+    FAPI2_RC_INVALID_PARAMETER           = FAPI2_RC_FAPI2_MASK | 0x04,
+    ///< Invalid parameters to a FAPI2 function
+
+    FAPI2_RC_OVERFLOW                    = FAPI2_RC_FAPI2_MASK | 0x05,
+    ///< Overflow condition, typically a buffer operation
+
+    FAPI2_RC_FALSE                       = FAPI2_RC_FAPI2_MASK | 0x06,
+    ///< The logical opposite of SUCCESS. Needed where procedures want
+    ///< a multi-bool type of operation (e.g., true, false, scom error)
+
+    //
+    // PLAT generated return codes. Additional details may be contained in
+    // ReturnCode platData (this can only be looked at by PLAT code)
+    //
+
+    FAPI2_RC_PLAT_ERR_SEE_DATA   = FAPI2_RC_PLAT_MASK | 0x01,
+    ///< Generic platform error
+
+    FAPI2_RC_PLAT_ERR_ADU_LOCKED = FAPI2_RC_PLAT_MASK | 0x02,
+    ///< Operation to AlterDisplay unit failed because it is locked
+
+    FAPI2_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME = FAPI2_RC_PLAT_MASK | 0x03,
+    ///< Operation not supported by HB runtime
+
+    FAPI2_RC_PLAT_ERR_RING_HEADER_CHECK = FAPI2_RC_PLAT_MASK | 0x04,
+    //Operation on putring fail because of header data mismatch
+    //
+    FAPI2_RC_PLAT_RING_DECODE_LENGTH_EXCEEDED = FAPI2_RC_PLAT_MASK | 0x05,
+    //Operation on putring fail because of decode length greater than actual
+    //ring length.
+
+    FAPI2_RC_PLAT_RS4_HEADER_DATA_INVALID = FAPI2_RC_PLAT_MASK | 0x06,
+    //Operation on putring fail because of ringId not found in RS4 image
+
+    FAPI2_RC_PLAT_TOR_HEADER_DATA_INVALID = FAPI2_RC_PLAT_MASK | 0x07,
+    //Accessing TOR ring section fail because TOR magic word not found
+};
+
+}
+
+#endif
