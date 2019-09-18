@@ -1,0 +1,147 @@
+ROOTPATH := ekb
+PROJECT_ROOT := $(ROOTPATH)
+OUTPUTPATH := output
+LIBPATH := $(OUTPUTPATH)/lib
+EXEPATH := $(OUTPUTPATH)/bin
+OJBPATH := $(OUTPUTPATH)/obj
+GENPATH := $(OUTPUTPATH)/gen
+IMAGEPATH := $(OUTPUTPATH)/images
+XIPPATH := $(OUTPUTPATH)/chips/p10/xip
+
+DLIST :=
+HLIST :=
+PLIST :=
+RLIST :=
+SLIST :=
+
+EKB_HLIST = \
+	$(shell find ekb/hwpf/fapi2/include -name '*.[Hh]' -print) \
+	$(shell find ekb/chips/common -name '*.[Hh]' -print) \
+	$(shell find ekb/chips/p10 -name '*.[Hh]' -print) \
+	$(shell find ekb/generic -name '*.[Hh]' -print) \
+	$(shell find ekb/tools -name '*.[Hh]' -print)
+
+define _ADD_MODULE_SRCDIR
+$(eval search_$(1) += $(2))
+endef
+
+define ADD_MODULE_SRCDIR
+$(eval search_$(1) += $(2)/)
+endef
+
+define ADD_MODULE_INCDIR
+$(eval DLIST += $(2))
+endef
+
+define ADD_MEMORY_INCDIRS
+$(eval DLIST += $(GENPATH))
+$(eval DLIST += $(ROOTPATH))
+$(eval DLIST += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared)
+$(eval DLIST += $(ROOTPATH)/chips/p10/common/include)
+$(eval DLIST += $(ROOTPATH)/chips/p10/procedures/hwp/memory/lib)
+$(eval DLIST += $(ROOTPATH)/chips/p10/procedures/hwp/memory)
+endef
+
+define __ADD_MODULE_INCDIRS
+$(warning "WARNING: Missing implementation of __ADD_MODULE_INCDIRS")
+endef
+
+define BUILD_PROCEDURE
+$(if $(findstring ifCompiler,$(PROCEDURE)),,\
+	$(eval $(call _BUILD_PROCEDURE))) \
+$(eval OBJS :=) \
+$(eval FAPI :=)
+endef
+
+define _BUILD_PROCEDURE
+$(eval localdir := $(dir $(lastword $(MAKEFILE_LIST)))) \
+$(eval DLIST += $(localdir)) \
+$(eval RLIST += rule_$(PROCEDURE)) \
+$(call _ADD_MODULE_SRCDIR,$(PROCEDURE),$(localdir)) \
+$(eval $(call __BUILD_PROCEDURE)) \
+$(eval header=$(wildcard $(localdir)/$(PROCEDURE).H)) \
+$(if $(header),$(eval HLIST += $(PROCEDURE).H),) \
+$(eval PLIST += lib$(PROCEDURE).a)
+endef
+
+define __BUILD_PROCEDURE
+$(eval SRC := $(if $(filter $(FAPI),2_IFCOMPILER),\
+		$(subst _ifCompiler,,$(PROCEDURE).C),\
+		$(PROCEDURE).C)) \
+$(eval SLIST += $(localdir)$(SRC)) \
+$(if $(OBJS),$(eval $(call SET_OBJ_PATH)),) \
+$(if $(FAPI),$(call FAPI$(FAPI)_PROCEDURE),$(call FAPI2_PROCEDURE))
+endef
+
+pathsearch = $(firstword $(wildcard $(addsuffix $(1),$(2))))
+
+define SET_OBJ_PATH
+$(foreach obj,$(OBJS),
+	$(eval objsrc=$(patsubst %.o,%.C,$(obj)))
+	$(eval objsrcpath=$(call pathsearch,$(objsrc),$(search_$(PROCEDURE))))
+	$(if $(objsrcpath),$(eval SRC_EXTRA += $(objsrcpath)),
+		$(error "Did not find $(obj) for $(PROCEDURE)")))
+endef
+
+define FAPI1_PROCEDURE
+$(warning "WARNING: We don't know how to build FAPI1 yet for $(PROCEDURE)")
+endef
+
+dollar := \$$$$
+
+define FAPI2_PROCEDURE
+$(eval rule_$(PROCEDURE):
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS = $(dollar)(LOCALCXXFLAGS)"
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS += $(lib$(PROCEDURE)_COMMONFLAGS)"
+	@echo "lib$(PROCEDURE)_a_SOURCES = $(localdir)$(SRC) $(SRC_EXTRA)"
+	@echo
+)
+endef
+
+define FAPI2_IFCOMPILER_PROCEDURE
+$(eval rule_$(PROCEDURE):
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS = $(dollar)(LOCALCXXFLAGS)"
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS += $(lib$(PROCEDURE)_COMMONFLAGS)"
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS += -DFAPI_SUPPORT_SPY_AS_STRING=1"
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS += -DIFCOMPILER_PLAT=1"
+	@echo "lib$(PROCEDURE)_a_CXXFLAGS += -DPLAT_NO_THREAD_LOCAL_STORAGE=1"
+	@echo "lib$(PROCEDURE)_a_SOURCES = $(localdir)$(SRC) $(SRC_EXTRA)"
+	@echo
+)
+endef
+
+all: definitions
+
+include Makefile.istep
+
+SLIST += $(SRC_EXTRA)
+
+# Sort the source list to remove duplicates
+ULIST = $(sort $(SLIST))
+
+definitions:
+	@echo -n "PROC_INCLUDE_CFLAGS ="
+	@printf " \\\\\n\t-I\$$(srcdir)/%s" $(sort $(DLIST))
+	@echo
+	@echo
+	@echo -n "PROCEDURES ="
+	@printf " \\\\\n\t%s" $(ULIST)
+	@echo
+	@echo
+	@echo -n "EKB_HEADER = "
+	@printf " \\\\\n\t%s" $(EKB_HLIST)
+	@echo
+	@echo
+
+procedures: $(RLIST)
+
+headers:
+	@echo "/* This file is auto-generated, do not edit */"
+	@echo "#ifndef __EKB_INCLUDE_H__"
+	@echo "#define __EKB_INCLUDE_H__"
+	@echo
+	@printf "#include <%s>\n" $(sort $(HLIST))
+	@echo
+	@echo "#endif /* __EKB_INCLUDE_H__ */"
+
+.PHONY: all definitions procedures headers

@@ -1,0 +1,2 @@
+# istep0
+include ekb/chips/p10/procedures/hwp/perv/p10_start_cbs.mk
