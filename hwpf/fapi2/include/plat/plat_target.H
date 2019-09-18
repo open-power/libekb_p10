@@ -24,7 +24,7 @@
 #ifndef __FAPI2_PLAT_TARGET__
 #define __FAPI2_PLAT_TARGET__
 
-#include <stdint.h>
+#include <libpdbg.h>
 
 //
 // Define what a platform handle looks like. For Hostboot,
@@ -33,7 +33,7 @@
 //
 namespace fapi2
 {
-typedef uint64_t plat_target_handle_t;
+	typedef struct pdbg_target *plat_target_handle_t;
 }
 
 #endif

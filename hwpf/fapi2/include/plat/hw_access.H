@@ -34,6 +34,12 @@
 #include <plat_hw_access.H>
 #include <fapi2_hw_access.H>
 
+extern "C" {
+#include <libpdbg.h>
+}
+
+#define pdbg_parent(tgt, cls) pdbg_target_parent(cls, tgt)
+
 namespace fapi2
 {
 //--------------------------------------------------------------------------
@@ -101,15 +107,16 @@ inline ReturnCode getScom(const Target<K, M, V>& i_target,
                           const uint64_t i_address,
                           buffer<uint64_t>& o_data)
 {
-    o_data = 0x0000FEEDFACE0000;
-    std::cout << std::hex << "   getScom "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "output data: " << uint64_t(o_data)
-              << std::dec << std::endl;
+	struct pdbg_target *target = i_target;
+	uint64_t data;
+	int rc;
 
-    return FAPI2_RC_SUCCESS;
+	rc = pib_read(target, i_address, &data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	o_data = data;
+	return FAPI2_RC_SUCCESS;
 }
 
 /// @brief Platform-level implementation of putScom()
@@ -123,13 +130,14 @@ inline ReturnCode putScom(const Target<K, M, V>& i_target,
                           const uint64_t i_address,
                           const buffer<uint64_t> i_data)
 {
-    std::cout << std::hex << "   putScom "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "input data: " << uint64_t(i_data)
-              << std::dec << std::endl;
-    return FAPI2_RC_SUCCESS;
+	struct pdbg_target *target = i_target;
+	int rc;
+
+	rc = pib_write(target, i_address, i_data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
 }
 
 /// @brief Platform-level implementation of putScomUnderMask()
@@ -145,14 +153,19 @@ inline ReturnCode putScomUnderMask(const Target<K, M, V>& i_target,
                                    const buffer<uint64_t> i_data,
                                    const buffer<uint64_t> i_mask)
 {
-    std::cout << std::hex << "   putScomUnderMask "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "input data: " << uint64_t(i_data) << "; "
-              << "input mask: " << uint64_t(i_mask)
-              << std::dec << std::endl;
-    return FAPI2_RC_SUCCESS;
+	uint64_t data;
+	int rc;
+
+	rc = pib_read(i_target, i_address, &data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	data = (data & ~i_mask) | (i_data & i_mask);
+	rc = pib_write(i_target, i_address, data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -169,14 +182,17 @@ inline ReturnCode getCfamRegister(const Target<K, M, V>& i_target,
                                   const uint32_t i_address,
                                   buffer<uint32_t>& o_data)
 {
-    o_data = 0xFEED0CFA;
-    std::cout << std::hex << "   getCfamRegister "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "output data: " << uint32_t(o_data)
-              << std::dec << std::endl;
-    return FAPI2_RC_SUCCESS;
+	struct pdbg_target *target = i_target;
+	uint32_t data;
+	int rc;
+
+	target = pdbg_parent(target, "fsi");
+	rc = fsi_read(target, i_address, &data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	o_data = data;
+	return FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -193,13 +209,15 @@ inline ReturnCode putCfamRegister(const Target<K, M, V>& i_target,
                                   const uint32_t i_address,
                                   const buffer<uint32_t> i_data)
 {
-    std::cout << std::hex << "   putCfamRegister "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "input data: " << uint32_t(i_data)
-              << std::dec << std::endl;
-    return FAPI2_RC_SUCCESS;
+	struct pdbg_target *target = i_target;
+	int rc;
+
+	target = pdbg_parent(target, "fsi");
+	rc = fsi_write(target, i_address, i_data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
 }
 
 
@@ -219,13 +237,6 @@ inline ReturnCode modifyCfamRegister(const Target<K, M, V>& i_target,
                                      const buffer<uint32_t> i_data,
                                      const fapi2::ChipOpModifyMode i_modifyMode)
 {
-    std::cout << std::hex << "   modifyCfamRegister "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "input modifying data: " << uint32_t(i_data) << "; "
-              << "input ChipOpModifyMode: " << i_modifyMode
-              << std::dec << std::endl;
     return FAPI2_RC_SUCCESS;
 }
 
@@ -241,13 +252,6 @@ ReturnCode putRing(const Target<K, M, V>& i_target,
                    const RingId_t i_ringID,
                    const RingMode i_ringMode)
 {
-    std::cout << std::hex << "   putRing "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "Ring ID: " << i_ringID << "; "
-              << "ring mode: " << i_ringMode
-              << std::endl;
-
     return FAPI2_RC_SUCCESS;
 }
 
@@ -269,16 +273,6 @@ inline ReturnCode getRing(const Target<K, M, V>& i_target,
                           variable_buffer& o_data,
                           const RingMode i_ringMode)
 {
-    o_data.setBit(0);
-    o_data.setBit(3);
-    std::cout << std::hex << "   getRing "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "ring address: " << i_address << "; "
-              << "ring mode: " << i_ringMode << "; "
-              << "first element of output data: " << o_data()[0]
-              << std::endl;
-
     return FAPI2_RC_SUCCESS;
 }
 
@@ -298,15 +292,6 @@ inline ReturnCode modifyRing(const Target<K, M, V>& i_target,
                              const ChipOpModifyMode i_modifyMode,
                              const RingMode i_ringMode)
 {
-    std::cout << std::hex << "   modifyRing "
-              << "target: {" << i_target.getType() << ","
-              << uint64_t(i_target) << "}; "
-              << "address: " << i_address << "; "
-              << "input ChipOpModifyMode: " << i_modifyMode << "; "
-              << "ring mode: " << i_ringMode << "; "
-              << "first element of the input data: " << i_data()[0]
-              << std::endl;
-
     return FAPI2_RC_SUCCESS;
 }
 #endif

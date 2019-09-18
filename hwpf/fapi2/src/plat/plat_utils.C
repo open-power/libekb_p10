@@ -22,11 +22,15 @@
  */
 
 #include <stdint.h>
-#include <utils.H>
 #include <plat_trace.H>
 #include <return_code.H>
 #include <error_info.H>
+#include <utils.H>
 #include <assert.h>
+
+extern "C" {
+#include <atdb/atdb.h>
+}
 
 namespace fapi2
 {
@@ -38,90 +42,6 @@ void logError(
     fapi2::errlSeverity_t i_sev,
     bool i_unitTestError)
 {
-    // To keep the compiler from complaing about i_sevbeing unused.
-    static_cast<void>(i_sev);
-    static_cast<void>(i_unitTestError);
-
-    FAPI_DBG("logging 0x%lx.", uint64_t(io_rc));
-
-    // Iterate over the vectors and output what is in them.
-    const ErrorInfo* ei = io_rc.getErrorInfo();
-
-    FAPI_DBG("ffdcs: %lu", ei->iv_ffdcs.size());
-
-    for( auto i = ei->iv_ffdcs.begin(); i != ei->iv_ffdcs.end(); ++i )
-    {
-        uint32_t sz;
-        (*i)->getData(sz);
-        FAPI_DBG("\tid: 0x%x size %d", (*i)->getFfdcId(), sz);
-    }
-
-    FAPI_DBG("hwCallouts: %lu", ei->iv_hwCallouts.size());
-
-    for( auto i = ei->iv_hwCallouts.begin(); i != ei->iv_hwCallouts.end();
-         ++i )
-    {
-        FAPI_DBG("\thw: %d pri %d target: 0x%lx",
-                 (*i)->iv_hw, (*i)->iv_calloutPriority,
-                 (*i)->iv_refTarget.get());
-    }
-
-    FAPI_DBG("procedureCallouts: %lu", ei->iv_procedureCallouts.size());
-
-    for( auto i = ei->iv_procedureCallouts.begin();
-         i != ei->iv_procedureCallouts.end(); ++i )
-    {
-        FAPI_DBG("\tprocedure: %d pri %d",
-                 (*i)->iv_procedure, (*i)->iv_calloutPriority);
-    }
-
-    FAPI_DBG("busCallouts: %lu", ei->iv_busCallouts.size());
-
-    for( auto i = ei->iv_busCallouts.begin(); i != ei->iv_busCallouts.end();
-         ++i )
-    {
-        FAPI_DBG("\tbus: t1: 0x%lx t2: 0x%lx pri: %d",
-                 (*i)->iv_target1.get(), (*i)->iv_target2.get(),
-                 (*i)->iv_calloutPriority);
-    }
-
-
-    FAPI_DBG("cdgs: %lu", ei->iv_CDGs.size());
-
-    for( auto i = ei->iv_CDGs.begin(); i != ei->iv_CDGs.end(); ++i )
-    {
-        FAPI_DBG("\ttarget: 0x%lx co: %d dc: %d gard: %d pri: %d",
-                 (*i)->iv_target.get(),
-                 (*i)->iv_callout,
-                 (*i)->iv_deconfigure,
-                 (*i)->iv_gard,
-                 (*i)->iv_calloutPriority);
-
-    }
-
-    FAPI_DBG("childrenCDGs: %lu", ei->iv_childrenCDGs.size());
-
-    for( auto i = ei->iv_childrenCDGs.begin();
-         i != ei->iv_childrenCDGs.end(); ++i )
-    {
-        FAPI_DBG("\tchildren: parent 0x%lx co: %d dc: %d gard: %d pri: %d",
-                 (*i)->iv_parent.get(),
-                 (*i)->iv_callout,
-                 (*i)->iv_deconfigure,
-                 (*i)->iv_gard,
-                 (*i)->iv_calloutPriority);
-    }
-
-    FAPI_DBG("traces: %lu", ei->iv_traces.size());
-
-    for( auto i = ei->iv_traces.begin(); i != ei->iv_traces.end(); ++i )
-    {
-        FAPI_DBG("\ttraces: 0x%x", (*i)->iv_eiTraceId);
-    }
-
-    // Release the ffdc information now that we're done with it.
-    io_rc.forgetData();
-
 }
 
 // will do the same as log error here in fapi2 plat implementation
@@ -172,4 +92,80 @@ void Assert(bool i_expression)
     assert(i_expression);
 }
 
+thread_local ReturnCode current_err;
+
+static struct atdb_context *atdb;
+
+ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
+{
+	uint32_t len;
+	int ret;
+
+	/* NULL targets use pdbg_dt_root */
+	if (!tgt) {
+	 	/* TODO: This should never happen but we've only got a partial
+	 	 * implementation of targetting so far */
+	 	printf("NULL target reading attribute not implemented reading %s. Using pdbg_dt_root for the moment.\n", attr);
+		tgt = pdbg_target_root();
+	}
+
+	/* FIXME: Initialize global state atdb */
+	len = size;
+	ret = atdb_set_attribute(atdb, tgt, attr, (uint8_t *)val, len);
+	if (ret != 0) {
+		if (ret == 1) {
+			printf("Unknown attribute '%s'\n", attr);
+		} else if (ret == 2) {
+			printf("Mismatch in attribute '%s' size %zu != %u\n", attr, size, len);
+		} else if (ret == 3) {
+			printf("Attribute '%s' target '%s' not found\n", attr, pdbg_target_dn_name(tgt));
+		} else if (ret == 4) {
+			printf("Attribute '%s' not found for target '%s'\n", attr, pdbg_target_dn_name(tgt));
+		}
+
+		return FAPI2_RC_FALSE;
+	}
+
+	return FAPI2_RC_SUCCESS;
+}
+
+ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
+{
+	uint32_t len;
+	int ret;
+
+	/* NULL targets use pdbg_dt_root */
+	if (!tgt) {
+	 	/* TODO: This should never happen but we've only got a partial
+	 	 * implementation of targetting so far */
+	 	printf("NULL target reading attribute %s. Using pdbg_dt_root for the moment.\n", attr);
+		tgt = pdbg_target_root();
+	}
+
+	len = size;
+	ret = atdb_get_attribute(atdb, tgt, attr, (uint8_t *)val, &len);
+	if (ret != 0) {
+		if (ret == 1) {
+			printf("Unknown attribute '%s'\n", attr);
+		} else if (ret == 2) {
+			printf("Mismatch in attribute '%s' size %zu != %u\n", attr, size, len);
+		} else if (ret == 3) {
+			printf("Attribute '%s' target '%s' not found\n", attr, pdbg_target_dn_name(tgt));
+		} else if (ret == 4) {
+			printf("Attribute '%s' not found for target '%s'\n", attr, pdbg_target_dn_name(tgt));
+		} else if (ret == 5) {
+			printf("Attribute '%s' value is UNDEFINED\n", attr);
+		}
+
+		return FAPI2_RC_FALSE;
+	}
+
+	return FAPI2_RC_SUCCESS;
+}
+
+}
+
+void plat_set_atdb_context(struct atdb_context *atdb_context)
+{
+	fapi2::atdb = atdb_context;
 }

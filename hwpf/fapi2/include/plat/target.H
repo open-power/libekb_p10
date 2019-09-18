@@ -111,6 +111,28 @@ inline Target<T, M, V> Target<K, M, V>::getParent(void) const
     return Target<T, M, V>(iv_handle);
 }
 
+static inline bool filter_ttype(struct pdbg_target *target, uint64_t type)
+{
+	uint32_t chip_id = 0;
+
+	if (type == -1ULL)
+		return true;
+
+	if (pdbg_target_u32_property(target, "index", &chip_id))
+		return false;
+
+	/* Pervasive 1 is bit 0/63 */
+	if (chip_id && (type & ((uint64_t) 1 << (64 - chip_id))))
+		return true;
+
+	return false;
+}
+
+template<TargetType T>
+inline const char *getChildrenImpl();
+
+template<> inline const char *getChildrenImpl<TARGET_TYPE_PERV>() { return "chiplet"; }
+
 ///
 /// @brief Get this target's children
 /// @tparam T The type of the parent
@@ -125,44 +147,15 @@ template<TargetType T>
 inline std::vector<Target<T, M, V> >
 Target<K, M, V>::getChildren(const TargetState i_state) const
 {
-    // valid children for multicast targets are the same with multicast stripped
-    static_assert(!((K & TARGET_TYPE_MULTICAST) &&
-                    (K != (T | TARGET_TYPE_MULTICAST))),
-                  "improper child of fapi2::TARGET_TYPE_MULTICAST");
+	std::vector<Target<T>> targets;
+	struct pdbg_target *target = NULL;
+	const char *klass = getChildrenImpl<T>();
 
-    // Example implementation of evaluating the members of a multicast group for P10,
-    // this should go into a .C file of course.
-    //
-    // if (K & TARGET_TYPE_MULTICAST)
-    // {
-    //     if (the plat_target turns out to really be a multicast target)
-    //     {
-    //         buffer<uint64_t> l_enabledTargets;
-    //         /*
-    //          * This "magic" SCOM operation will perform a "grab bit 0" multicast read from
-    //          * an address in the PCB slave that is guaranteed to be readable (since it does
-    //          * not depend on a chiplet being powered/enabled/clocked) and always have bit 0
-    //          * set to '1' (per definition).
-    //          * The result of the operation will be a 64bit value that will contain said bit 0,
-    //          * i.e. a '1' for all members of the multicast group, and a '0' for all others.
-    //          */
-    //         getScom(Target < TARGET_TYPE_PERV | TARGET_TYPE_MULTICAST, MULTICAST_BITX > (*this),
-    //                 0xF0001, l_enabledTargets);
-    //
-    //         return {targets for all chiplets enabled in l_enabledTargets};
-    //     }
-    //     else
-    //     {
-    //         // If this target is a unicast target in disguise, return just this target
-    //         // with the multicast qualifier stripped.
-    //         return {Target<T, M, V>(*this)};
-    //     }
-    // }
+	pdbg_for_each_target(klass, iv_handle, target)
+		if (i_state == TARGET_STATE_PRESENT || Target(target).isFunctional())
+			targets.push_back(target);
 
-    // To keep the compiler quiet about unused variables
-    static_cast<void>(i_state);
-    // For testing
-    return {Target<T, M, V>(), Target<T, M, V>()};
+	return targets;
 }
 // Specialization of getChildren, filtered for pervasive targets.
 template<>
@@ -171,12 +164,25 @@ inline std::vector<Target<TARGET_TYPE_PERV> >
 Target<TARGET_TYPE_PERV>::getChildren(const TargetFilter i_filter,
                                       const TargetState i_state ) const
 {
-    // To keep the compiler quiet about unused variables
-    static_cast<void>(i_state);
-    static_cast<void>(i_filter);
+	std::vector<Target<TARGET_TYPE_PERV>> targets;
+	struct pdbg_target *target = NULL;
 
-    // For testing
-    return {Target<TARGET_TYPE_PERV>(i_filter), Target<TARGET_TYPE_PERV>(i_filter)};
+	/* HACK: This allows us to define implementations such that things
+	* build/link but that we don't have enough understanding of to
+	* actually implement yet in a way that will get noticed if
+	* actually used at runtime. */
+
+	pdbg_for_each_target("chiplet", iv_handle, target) {
+		if (!filter_ttype(target, i_filter))
+			continue;
+
+		if (i_state == TARGET_STATE_FUNCTIONAL && !Target(target).isFunctional())
+			continue;
+
+		targets.push_back(target);
+	}
+
+	return targets;
 }
 
 template<TargetType K, MulticastType M, typename V>
