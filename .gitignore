@@ -63,8 +63,8 @@ config.h.in
 config.sub
 configure
 depcomp
-include/attributes/
-include/error_info/
+hwpf/fapi2/include/attributes/*.*
+hwpf/fapi2/include/error_info/*.*
 install-sh
 ltmain.sh
 m4/
