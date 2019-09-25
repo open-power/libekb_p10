@@ -12,14 +12,7 @@ ignore_tags = ['description', 'platInit', 'writeable', 'overrideOnly',
 data_types = ['uint8', 'uint16', 'uint32', 'uint64',
               'int8', 'int16', 'int32', 'int64']
 
-target_map = {
-    'TARGET_TYPE_SYSTEM': 'root',
-    'TARGET_TYPE_PROC_CHIP': 'pib',
-    'TARGET_TYPE_CORE': 'core',
-    'TARGET_TYPE_XBUS': 'xbus',
-    'TARGET_TYPE_OBUS': 'obus',
-    'TARGET_TYPE_PERV': 'chiplet',
-}
+target_map = {}
 
 class AttributeError(Exception):
     def __init__(self, msg):
