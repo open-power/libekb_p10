@@ -20,6 +20,9 @@ elif test "$ARCH" = "arm" ; then
 elif test "$ARCH" = "ppc64" ; then
 	AC_MSG_NOTICE([Building on PPC64])
 	TARGET_ENDIAN="-DHAVE_BIG_ENDIAN"
+elif test "$ARCH" = "ppc64le" ; then
+	AC_MSG_NOTICE([Building on PPC64LE])
+	TARGET_ENDIAN="-DHAVE_LITTLE_ENDIAN"
 else
 	AC_MSG_ERROR([libekb cannot be built on $ARCH platform])
 fi
