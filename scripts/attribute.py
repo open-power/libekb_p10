@@ -212,9 +212,12 @@ class AttributeCollection:
             raise AttributeError('Instance of class Attribute required')
         if force or attr.valid():
             name = attr.name()
-            self.__attribute[name] = attr
-            for t in attr.target():
-                self.add_target(t, [name])
+            if name in self.__attribute:
+                print('Duplicate attribute "%s"' % name)
+            else:
+                self.__attribute[name] = attr
+                for t in attr.target():
+                    self.add_target(t, [name])
         else:
             print('Skipping attribute "%s"' % attr.name())
 
