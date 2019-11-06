@@ -21,6 +21,7 @@
  *  @brief Implements fapi2 common utilities
  */
 
+#include <target.H>
 #include <stdint.h>
 #include <plat_trace.H>
 #include <return_code.H>

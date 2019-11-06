@@ -85,7 +85,8 @@ HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_vpd_access.H \
 	$(srcdir)/hwpf/fapi2/include/plat/subroutine_executor.H \
 	$(srcdir)/hwpf/fapi2/include/plat/target.H \
-	$(srcdir)/hwpf/fapi2/include/plat/vpd_access.H
+	$(srcdir)/hwpf/fapi2/include/plat/vpd_access.H \
+	$(srcdir)/hwpf/fapi2/include/plat/ffdc_includes.H
 
 p10_attributes.db: $(ATTRIB_XML) $(srcdir)/scripts/attribute.py
 	$(AM_V_GEN)$(srcdir)/scripts/attribute.py parse $@ $(ATTRIB_XML)
@@ -111,7 +112,6 @@ LOCALCFLAGS = $(OPTFLAGS) -g -Wall -std=gnu11 $(TARGET_ENDIAN)
 LOCALCXXFLAGS = $(OPTFLAGS) -Wall -std=gnu++11 \
 		-fpermissive -fno-exceptions -fno-rtti \
 		$(TARGET_ENDIAN) \
-		-DFAPI2_NO_FFDC \
 		-I$(srcdir) \
 		-I$(srcdir)/src \
 		-I$(srcdir)/hwpf/fapi2/include \

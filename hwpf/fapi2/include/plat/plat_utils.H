@@ -25,6 +25,8 @@
 #define __FAPI2_PLAT_UTILS__
 
 #include <stdint.h>
+#include <target.H>
+#include <return_code.H>
 #include <error_info_defs.H>
 
 namespace fapi2

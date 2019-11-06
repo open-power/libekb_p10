@@ -40,6 +40,7 @@ extern "C" {
 #include <stdint.h>
 }
 
+#include <target.H>
 #include <return_code.H>
 #include <attribute_ids.H>
 //#include <fapi2ClientCapi.H>
