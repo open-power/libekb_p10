@@ -151,7 +151,7 @@ class Attribute:
 
     def target(self):
         tlist = []
-        for t in self.__target:
+        for t in set(self.__target):
             if t in target_map:
                 tlist.append(target_map[t])
             else:
