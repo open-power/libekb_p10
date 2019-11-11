@@ -322,6 +322,53 @@ inline void toString(const Target<T, M, V>* i_target,
     toString(*i_target, i_buffer, i_bsize);
 }
 
+template<>
+template<>
+inline Target<TARGET_TYPE_CHIPS> Target<TARGET_TYPE_DIMM>::getParent(void) const
+{
+	struct pdbg_target *target;
+
+	target = pdbg_target_require_parent("pib", iv_handle);
+
+	return Target<TARGET_TYPE_CHIPS>(target);
+}
+
+/* Copied from collect_reg_ffdc.H. We can't just include
+ * collect_reg_ffdc.H because that first includes target.H (this file)
+ * so we have no way of accessing it's definition of this. So instead
+ * we have to redefine it here. */
+const fapi2::TargetType PLAT_TARGET_TYPE_PROC_CHIPLETS = fapi2::TARGET_TYPE_EX |
+        fapi2::TARGET_TYPE_MCS |
+        fapi2::TARGET_TYPE_XBUS |
+        fapi2::TARGET_TYPE_CORE |
+        fapi2::TARGET_TYPE_EQ |
+        fapi2::TARGET_TYPE_MCA |
+        fapi2::TARGET_TYPE_MCBIST |
+        fapi2::TARGET_TYPE_MI |
+        fapi2::TARGET_TYPE_CAPP |
+        fapi2::TARGET_TYPE_DMI |
+        fapi2::TARGET_TYPE_OBUS |
+        fapi2::TARGET_TYPE_OBUS_BRICK |
+        fapi2::TARGET_TYPE_SBE |
+        fapi2::TARGET_TYPE_PPE |
+        fapi2::TARGET_TYPE_PERV |
+        fapi2::TARGET_TYPE_PEC |
+        fapi2::TARGET_TYPE_PHB |
+        fapi2::TARGET_TYPE_MC |
+        fapi2::TARGET_TYPE_OMI |
+        fapi2::TARGET_TYPE_MEM_PORT;
+
+template<>
+template<>
+inline Target<TARGET_TYPE_CHIPS> Target<PLAT_TARGET_TYPE_PROC_CHIPLETS>::getParent(void) const
+{
+	struct pdbg_target *target;
+
+	target = pdbg_target_require_parent("pib", iv_handle);
+
+	return Target<TARGET_TYPE_CHIPS>(target);
+}
+
 ///
 /// @brief Get an enumerated target of a specific type
 /// @tparam T The type of the target
