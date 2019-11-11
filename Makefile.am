@@ -61,7 +61,7 @@ ERROR_INFO_HEADER = \
 
 $(ERROR_INFO_DIR)/hwp_error_info.H: $(ERROR_INFO_XML)
 	@$(MKDIR_P) $(ERROR_INFO_DIR)
-	$(EKB)/hwpf/fapi2/tools/parseErrorInfo.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
+	$(EKB)/hwpf/fapi2/tools/parseErrorInfo_p10.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
 
 $(ERROR_INFO_HEADER): $(ERROR_INFO_DIR)/hwp_error_info.H
 
@@ -85,8 +85,7 @@ HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_vpd_access.H \
 	$(srcdir)/hwpf/fapi2/include/plat/subroutine_executor.H \
 	$(srcdir)/hwpf/fapi2/include/plat/target.H \
-	$(srcdir)/hwpf/fapi2/include/plat/vpd_access.H \
-	$(srcdir)/hwpf/fapi2/include/plat/ffdc_includes.H
+	$(srcdir)/hwpf/fapi2/include/plat/vpd_access.H
 
 p10_attributes.db: $(ATTRIB_XML) $(srcdir)/scripts/attribute.py
 	$(AM_V_GEN)$(srcdir)/scripts/attribute.py parse $@ $(ATTRIB_XML)
@@ -120,7 +119,9 @@ LOCALCXXFLAGS = $(OPTFLAGS) -Wall -std=gnu++11 \
 		-I$(srcdir)/hwpf/fapi2/include/plat \
 		-I$(srcdir)/ekb/hwpf/fapi2/include \
 		-I$(srcdir)/ekb/chips/p10/common/include \
+		-I$(srcdir)/ekb/chips/p10/procedures/hwp/ffdc \
 		-I$(srcdir)/ekb/chips/common/utils/scomt \
+		-I$(srcdir)/ekb/chips/ocmb/explorer/common/include \
 		$(PROC_INCLUDE_CFLAGS)
 
 lib_LTLIBRARIES = libekb.la
@@ -139,10 +140,13 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    libekb.H \
 		    hwpf/fapi2/src/fapi2_utils.C \
 		    hwpf/fapi2/src/plat/plat_utils.C \
+		    ekb/hwpf/fapi2/src/error_info.C \
+		    ekb/hwpf/fapi2/src/ffdc.C \
 		    $(ATTRIB_HEADER) \
 		    $(ATTRIB_DIR)/platform_attrs.h \
 		    $(ERROR_INFO_HEADER) \
 		    $(ERROR_INFO_DIR)/hwp_error_info.H \
+		    $(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C \
 		    $(HWPF_HEADER)
 
 libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
