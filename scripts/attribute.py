@@ -2,7 +2,6 @@
 
 import sys
 import xml.etree.ElementTree as ET
-import gdbm
 
 ignore_tags = ['description', 'platInit', 'writeable', 'overrideOnly',
                'persistRuntime', 'mssUnit', 'mssUnits', 'mssAccessorName',
@@ -292,38 +291,50 @@ class AttributeCollection:
 class AttributeDatabase:
     def __init__(self, filename):
         self.filename = filename
-        self.db = None
+        self.fd = None
+
+    def read_record(self, match_key=None):
+        line = self.fd.readline()
+        val = line.split(' ', 1)
+        if match_key is not None:
+            if val[0] != match_key:
+                raise AttributeError('Expected %s, got %s\n' % (match_key, val[0]))
+        return (val[0].strip(), val[1].strip())
 
     def write_all(self, all_attributes):
-        self.db['all'] = ' '.join(all_attributes)
+        self.fd.write('all %s\n' % (' '.join(all_attributes)))
 
     def read_all(self):
-        return self.db['all'].split()
+        key, value = self.read_record('all')
+        return value.split()
 
     def write_attr(self, attr):
-        self.db[attr.name()] = attr.format()
+        self.fd.write('%s %s\n' % (attr.name(), attr.format()))
 
     def read_attr(self, name):
+        key, value = self.read_record()
         attr = Attribute()
-        attr.parse(name, self.db[name])
+        attr.parse(key, value)
         return attr
 
     def write_targets(self, tlist):
-        self.db['targets'] = ' '.join(tlist)
+        self.fd.write('targets %s\n' % (' '.join(tlist)))
 
     def read_targets(self):
-        return self.db['targets'].split()
+        key, value = self.read_record('targets')
+        return value.split()
 
     def write_target_rec(self, target, idlist):
         idlist_str = [str(i) for i in idlist]
-        self.db[target] = ' '.join(idlist_str)
+        self.fd.write('%s %s\n' % (target, ' '.join(idlist_str)))
 
     def read_target_rec(self, target):
-        idlist_str = self.db[target].split()
+        key, value = self.read_record(target)
+        idlist_str = value.split()
         return [int(i) for i in idlist_str]
 
     def read(self):
-        self.db = gdbm.open(self.filename, 'r')
+        self.fd = file(self.filename, 'r')
         ac = AttributeCollection()
         alist = self.read_all()
         for a in alist:
@@ -337,7 +348,7 @@ class AttributeDatabase:
         return ac
 
     def write(self, ac):
-        self.db = gdbm.open(self.filename, 'c')
+        self.fd = file(self.filename, 'w')
         alist = ac.attributes('all')
         tlist = ac.targets()
         self.write_all(alist)
