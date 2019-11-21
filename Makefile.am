@@ -129,9 +129,12 @@ nobase_include_HEADERS = \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
 	$(HWPF_HEADER)
+include_HEADERS = libekb.H
 
 libekb_la_SOURCES = $(PROCEDURES) \
 		    $(EKB_HEADER) \
+		    libekb.C \
+		    libekb.H \
 		    hwpf/fapi2/src/fapi2_utils.C \
 		    hwpf/fapi2/src/plat/plat_utils.C \
 		    $(ATTRIB_HEADER) \
