@@ -29,7 +29,7 @@
 #include <assert.h>
 
 extern "C" {
-#include <atdb/atdb.h>
+#include <fdt/fdt_prop.h>
 }
 
 namespace fapi2
@@ -94,12 +94,12 @@ void Assert(bool i_expression)
 
 thread_local ReturnCode current_err;
 
-static struct atdb_context *atdb;
+static void *fdt;
 
 ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
 {
-	uint32_t len;
-	int ret;
+	char *path;
+	int len, ret;
 
 	/* NULL targets use pdbg_dt_root */
 	if (!tgt) {
@@ -109,30 +109,29 @@ ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, 
 		tgt = pdbg_target_root();
 	}
 
-	/* FIXME: Initialize global state atdb */
-	len = size;
-	ret = atdb_set_attribute(atdb, tgt, attr, (uint8_t *)val, len);
-	if (ret != 0) {
-		if (ret == 1) {
-			printf("Unknown attribute '%s'\n", attr);
-		} else if (ret == 2) {
-			printf("Mismatch in attribute '%s' size %zu != %u\n", attr, size, len);
-		} else if (ret == 3) {
-			printf("Attribute '%s' target '%s' not found\n", attr, pdbg_target_dn_name(tgt));
-		} else if (ret == 4) {
-			printf("Attribute '%s' not found for target '%s'\n", attr, pdbg_target_dn_name(tgt));
-		}
+	path = pdbg_target_path(tgt);
+	assert(path);
 
+	len = size;
+	ret = fdt_prop_write(fdt, path, attr, (uint8_t *)val, len);
+	if (ret != 0) {
+		if (ret == 1)
+			printf("Target %s not found\n", path);
+		else if (ret == 2)
+			printf("Attribute '%s' not found for target '%s'\n", attr, path);
+
+		free(path);
 		return FAPI2_RC_FALSE;
 	}
 
+	free(path);
 	return FAPI2_RC_SUCCESS;
 }
 
 ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
 {
-	uint32_t len;
-	int ret;
+	char *path;
+	int len, ret;
 
 	/* NULL targets use pdbg_dt_root */
 	if (!tgt) {
@@ -142,30 +141,33 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 		tgt = pdbg_target_root();
 	}
 
-	len = size;
-	ret = atdb_get_attribute(atdb, tgt, attr, (uint8_t *)val, &len);
-	if (ret != 0) {
-		if (ret == 1) {
-			printf("Unknown attribute '%s'\n", attr);
-		} else if (ret == 2) {
-			printf("Mismatch in attribute '%s' size %zu != %u\n", attr, size, len);
-		} else if (ret == 3) {
-			printf("Attribute '%s' target '%s' not found\n", attr, pdbg_target_dn_name(tgt));
-		} else if (ret == 4) {
-			printf("Attribute '%s' not found for target '%s'\n", attr, pdbg_target_dn_name(tgt));
-		} else if (ret == 5) {
-			printf("Attribute '%s' value is UNDEFINED\n", attr);
-		}
-
+	if (!fdt) {
+		printf("FDT not initialized\n");
 		return FAPI2_RC_FALSE;
 	}
 
+	path = pdbg_target_path(tgt);
+	assert(path);
+
+	len = size;
+	ret = fdt_prop_read(fdt, path, attr, (uint8_t *)val, &len);
+	if (ret != 0) {
+		if (ret == 1)
+			printf("Target %s not found\n", path);
+		else if (ret == 2)
+			printf("Attribute '%s' not found for target '%s'\n", attr, path);
+
+		free(path);
+		return FAPI2_RC_FALSE;
+	}
+
+	free(path);
 	return FAPI2_RC_SUCCESS;
 }
 
 }
 
-void plat_set_atdb_context(struct atdb_context *atdb_context)
+void plat_set_fdt(void *fdt)
 {
-	fapi2::atdb = atdb_context;
+	fapi2::fdt = fdt;
 }

@@ -27,10 +27,6 @@
 #include <stdint.h>
 #include <error_info_defs.H>
 
-extern "C" {
-#include <atdb/atdb.h>
-}
-
 namespace fapi2
 {
 
@@ -69,6 +65,6 @@ inline ReturnCode platSpecialWakeup( const Target<T>& i_target, bool i_enable)
 
 }
 
-void plat_set_atdb_context(struct atdb_context *atdb_context);
+void plat_set_fdt(void *fdt);
 
 #endif

@@ -41,9 +41,9 @@ if test x"$ac_cv_lib_pdbg_pdbg_targets_init" != xyes ; then
 	AC_MSG_ERROR([Unable to find pdbg library])
 fi
 
-AC_CHECK_LIB([atdb], [atdb_get_attribute], [LIBS="-latdb $LIBS"])
-if test x"$ac_cv_lib_atdb_atdb_get_attribute" != xyes ; then
-	AC_MSG_ERROR([Unable to find atdb library])
+AC_CHECK_LIB([fdt-prop], [fdt_prop_read], [LIBS="-lfdt-prop $LIBS"])
+if test x"$ac_cv_lib_fdt_prop_fdt_prop_read" != xyes ; then
+	AC_MSG_ERROR([Unable to find fdt-prop library])
 fi
 
 m4_syscmd([make -f Makefile.generate > Makefile.proc.am])
