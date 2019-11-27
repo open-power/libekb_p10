@@ -4,3 +4,6 @@ include ekb/chips/p10/procedures/hwp/perv/p10_clock_test.mk
 include ekb/chips/p10/procedures/hwp/perv/p10_select_boot_master.mk
 include ekb/chips/p10/procedures/hwp/perv/p10_setup_sbe_config.mk
 include ekb/chips/p10/procedures/hwp/perv/p10_start_cbs.mk
+
+# istep6-21
+include ekb/chips/p10/procedures/hwp/istep/p10_do_fw_hb_istep.mk
