@@ -38,7 +38,7 @@ extern "C" {
 #include <libpdbg.h>
 }
 
-#define pdbg_parent(tgt, cls) pdbg_target_parent(cls, tgt)
+#define pdbg_parent(tgt, cls) pdbg_target_parent_virtual(cls, tgt)
 
 namespace fapi2
 {
