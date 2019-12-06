@@ -182,11 +182,15 @@ inline ReturnCode getCfamRegister(const Target<K, M, V>& i_target,
                                   const uint32_t i_address,
                                   buffer<uint32_t>& o_data)
 {
-	struct pdbg_target *target = i_target;
+	struct pdbg_target *proc, *target = i_target;
 	uint32_t data;
 	int rc;
 
-	target = pdbg_parent(target, "fsi");
+	proc = pdbg_parent(target, NULL);
+	pdbg_for_each_target("fsi", proc, target) {
+		break;
+	}
+
 	rc = fsi_read(target, i_address, &data);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
@@ -209,10 +213,14 @@ inline ReturnCode putCfamRegister(const Target<K, M, V>& i_target,
                                   const uint32_t i_address,
                                   const buffer<uint32_t> i_data)
 {
-	struct pdbg_target *target = i_target;
+	struct pdbg_target *proc, *target = i_target;
 	int rc;
 
-	target = pdbg_parent(target, "fsi");
+	proc = pdbg_parent(target, NULL);
+	pdbg_for_each_target("fsi", proc, target) {
+		break;
+	}
+
 	rc = fsi_write(target, i_address, i_data);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
