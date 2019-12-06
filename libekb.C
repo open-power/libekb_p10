@@ -10,18 +10,16 @@ extern "C" {
 
 #include "libekb.H"
 
-int libekb_init(void *fdt)
+int libekb_init(void)
 {
-	assert(fdt);
+	struct pdbg_dtb dtb;
 
-	plat_set_fdt(fdt);
-
-	if (!pdbg_set_backend(PDBG_BACKEND_KERNEL, NULL))
-		return -1;
-
-	if (!pdbg_targets_init(fdt)) {
+	if (!pdbg_targets_init(NULL)) {
 		return -1;
 	}
+
+	pdbg_default_dtb(&dtb, NULL);
+	plat_set_fdt(dtb.system);
 
 	return 0;
 }
