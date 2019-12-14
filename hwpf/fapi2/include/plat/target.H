@@ -132,6 +132,14 @@ template<TargetType T>
 inline const char *getChildrenImpl();
 
 template<> inline const char *getChildrenImpl<TARGET_TYPE_PERV>() { return "chiplet"; }
+/// TODO This implementaion logic need to be revisited.
+template<> inline const char *getChildrenImpl<TARGET_TYPE_IOHS>() { return "iohs"; }
+template<> inline const char *getChildrenImpl<TARGET_TYPE_MC>() { return "mc"; }
+template<> inline const char *getChildrenImpl<TARGET_TYPE_PEC>() { return "pec"; }
+template<> inline const char *getChildrenImpl<TARGET_TYPE_CORE>() { return "core"; }
+template<> inline const char *getChildrenImpl<TARGET_TYPE_NMMU>() { return "nmmu"; }
+template<> inline const char *getChildrenImpl<TARGET_TYPE_PAUC>() { return "pauc"; }
+template<> inline const char *getChildrenImpl<TARGET_TYPE_PAU>() { return "pau"; }
 
 ///
 /// @brief Get this target's children
