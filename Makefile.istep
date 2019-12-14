@@ -1,2 +1,6 @@
 # istep0
+include ekb/chips/p10/procedures/hwp/perv/p10_setup_ref_clock.mk
+include ekb/chips/p10/procedures/hwp/perv/p10_clock_test.mk
+include ekb/chips/p10/procedures/hwp/perv/p10_select_boot_master.mk
+include ekb/chips/p10/procedures/hwp/perv/p10_setup_sbe_config.mk
 include ekb/chips/p10/procedures/hwp/perv/p10_start_cbs.mk
