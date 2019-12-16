@@ -54,15 +54,16 @@ $(ATTRIB_DIR)/platform_attrs.h: $(ATTRIB_DIR)/attribute_plat_check.H
 ERROR_INFO_XML = $(EKB)/chips/p10/procedures/xml/error_info/*.xml
 ERROR_INFO_DIR = $(srcdir)/hwpf/fapi2/include/error_info
 ERROR_INFO_HEADER = \
-	$(ERROR_INFO_DIR)/hwp_error_info.H \
 	$(ERROR_INFO_DIR)/hwp_ffdc_classes.H \
-       	$(ERROR_INFO_DIR)/hwp_return_codes.H \
-       	$(ERROR_INFO_DIR)/set_sbe_error_funcs.H \
+	$(ERROR_INFO_DIR)/hwp_return_codes.H \
+	$(ERROR_INFO_DIR)/set_sbe_error_funcs.H \
 	$(ERROR_INFO_DIR)/set_sbe_error.H
 
-$(ERROR_INFO_HEADER): $(ERROR_INFO_XML)
+$(ERROR_INFO_DIR)/hwp_error_info.H: $(ERROR_INFO_XML)
 	@$(MKDIR_P) $(ERROR_INFO_DIR)
 	$(EKB)/hwpf/fapi2/tools/parseErrorInfo.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
+
+$(ERROR_INFO_HEADER): $(ERROR_INFO_DIR)/hwp_error_info.H
 
 HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/hwp_executor.H \
@@ -128,6 +129,7 @@ nobase_include_HEADERS = \
 	$(ATTRIB_HEADER) \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
+	$(ERROR_INFO_DIR)/hwp_error_info.H \
 	$(HWPF_HEADER)
 include_HEADERS = libekb.H
 
@@ -140,13 +142,15 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    $(ATTRIB_HEADER) \
 		    $(ATTRIB_DIR)/platform_attrs.h \
 		    $(ERROR_INFO_HEADER) \
+		    $(ERROR_INFO_DIR)/hwp_error_info.H \
 		    $(HWPF_HEADER)
 
 libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
 
 $(PROCEDURES): $(ATTRIB_HEADER) \
 	       $(ATTRIB_DIR)/platform_attrs.h \
-	       $(ERROR_INFO_HEADER)
+	       $(ERROR_INFO_HEADER) \
+	       $(ERROR_INFO_DIR)/hwp_error_info.H
 
 #		   ekb/chips/p10/xip/p10_xip_image.C \
 #		   ekb/chips/p10/utils/imageProcs/p10_dd_container.c \
