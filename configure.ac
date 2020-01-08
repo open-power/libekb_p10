@@ -46,6 +46,11 @@ if test x"$ac_cv_lib_fdt_prop_fdt_prop_read" != xyes ; then
 	AC_MSG_ERROR([Unable to find fdt-prop library])
 fi
 
+AC_CHECK_LIB([attribute-format], [attr_encode], [LIBS="-lattribute-format $LIBS"])
+if test x"$ac_cv_lib_attribute_format_attr_encode" != xyes ; then
+	AC_MSG_ERROR([Unable to find attribute-format library])
+fi
+
 m4_syscmd([make -f Makefile.generate > Makefile.proc.am])
 
 AC_CONFIG_FILES([Makefile])

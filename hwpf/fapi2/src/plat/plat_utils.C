@@ -31,6 +31,7 @@
 
 extern "C" {
 #include <fdt/fdt_prop.h>
+#include <attribute/attribute_format.h>
 }
 
 namespace fapi2
@@ -99,6 +100,8 @@ static void *fdt;
 
 ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
 {
+	struct attr attrib;
+	uint8_t *value;
 	char *path;
 	int len, ret;
 
@@ -113,8 +116,38 @@ ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, 
 	path = pdbg_target_path(tgt);
 	assert(path);
 
-	len = size;
-	ret = fdt_prop_write(fdt, path, attr, (uint8_t *)val, len);
+	/* Maximum header size is 4 words */
+	len = size + 16;
+	value = (uint8_t *)malloc(len);
+	assert(value);
+
+	ret = fdt_prop_read(fdt, path, attr, value, &len);
+	if (ret != 0) {
+		if (ret == 1)
+			printf("Target %s not found\n", path);
+		else if (ret == 2)
+			printf("Attribute '%s' not found for target '%s'\n", attr, path);
+
+		free(path);
+		free(value);
+		return FAPI2_RC_FALSE;
+	}
+
+	attr_decode(&attrib, value, len);
+	free(value);
+	if ((unsigned int)attrib.size != size) {
+		printf("Wrong size (%zu, expected %d) for attribute '%s'\n", size, attrib.size, attr);
+		free(path);
+		free(attrib.value);
+		return FAPI2_RC_FALSE;
+	}
+
+	free(attrib.value);
+	attrib.value = (uint8_t *)val;
+
+	attr_encode(&attrib, &value, &len);
+
+	ret = fdt_prop_write(fdt, path, attr, value, len);
 	if (ret != 0) {
 		if (ret == 1)
 			printf("Target %s not found\n", path);
@@ -131,6 +164,8 @@ ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, 
 
 ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
 {
+	struct attr attrib;
+	uint8_t *value;
 	char *path;
 	int len, ret;
 
@@ -150,8 +185,12 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 	path = pdbg_target_path(tgt);
 	assert(path);
 
-	len = size;
-	ret = fdt_prop_read(fdt, path, attr, (uint8_t *)val, &len);
+	/* Maximum header size is 4 words */
+	len = size + 16;
+	value = (uint8_t *)malloc(len);
+	assert(value);
+
+	ret = fdt_prop_read(fdt, path, attr, value, &len);
 	if (ret != 0) {
 		if (ret == 1)
 			printf("Target %s not found\n", path);
@@ -159,10 +198,23 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 			printf("Attribute '%s' not found for target '%s'\n", attr, path);
 
 		free(path);
+		free(value);
 		return FAPI2_RC_FALSE;
 	}
 
 	free(path);
+
+	attr_decode(&attrib, value, len);
+	free(value);
+	if ((unsigned int)attrib.size != size) {
+		printf("Wrong size (%zu, expected %d) for attribute '%s'\n", size, attrib.size, attr);
+		free(attrib.value);
+		return FAPI2_RC_FALSE;
+	}
+
+	memcpy(val, attrib.value, size);
+	free(attrib.value);
+
 	return FAPI2_RC_SUCCESS;
 }
 
