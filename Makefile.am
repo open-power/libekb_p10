@@ -146,7 +146,7 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    $(ATTRIB_DIR)/platform_attrs.h \
 		    $(ERROR_INFO_HEADER) \
 		    $(ERROR_INFO_DIR)/hwp_error_info.H \
-		    $(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C \
+		    hwpf/fapi2/include/error_info/collect_reg_ffdc_regs.C \
 		    $(HWPF_HEADER)
 
 libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
