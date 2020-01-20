@@ -28,6 +28,7 @@
 #include <error_info.H>
 #include <utils.H>
 #include <assert.h>
+#include <time.h>
 
 extern "C" {
 #include <attribute/attribute_api.h>
@@ -75,11 +76,21 @@ ReturnCode delay(uint64_t i_nanoSeconds, uint64_t i_simCycles, bool i_fixed)
 {
     // void statements to keep the compiler from complaining
     // about unused variables.
-    static_cast<void>(i_nanoSeconds);
     static_cast<void>(i_simCycles);
     static_cast<void>(i_fixed);
+    struct timespec delay;
+    int rc;
 
-    // replace with platform specific implementation
+    delay.tv_sec = i_nanoSeconds / 1000000000;
+    delay.tv_nsec = i_nanoSeconds % 1000000000;
+
+    do {
+	    rc = nanosleep(&delay, &delay);
+    } while (rc == -EINTR);
+
+    if (rc)
+	    return FAPI2_RC_FALSE;
+
     return FAPI2_RC_SUCCESS;
 }
 
