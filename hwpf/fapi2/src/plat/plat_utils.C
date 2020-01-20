@@ -30,8 +30,7 @@
 #include <assert.h>
 
 extern "C" {
-#include <fdt/fdt_prop.h>
-#include <attribute/attribute_format.h>
+#include <attribute/attribute_api.h>
 }
 
 namespace fapi2
@@ -96,14 +95,10 @@ void Assert(bool i_expression)
 
 thread_local ReturnCode current_err;
 
-static void *fdt;
-
 ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
 {
-	struct attr attrib;
-	uint8_t *value;
-	char *path;
-	int len, ret;
+	const char *path;
+	int ret;
 
 	/* NULL targets use pdbg_dt_root */
 	if (!tgt) {
@@ -116,58 +111,25 @@ ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, 
 	path = pdbg_target_path(tgt);
 	assert(path);
 
-	/* Maximum header size is 4 words */
-	len = size + 16;
-	value = (uint8_t *)malloc(len);
-	assert(value);
-
-	ret = fdt_prop_read(fdt, path, attr, value, &len);
+	ret = attr_write(tgt, attr, val, size);
 	if (ret != 0) {
-		if (ret == 1)
-			printf("Target %s not found\n", path);
-		else if (ret == 2)
+		if (ret == ENOENT)
 			printf("Attribute '%s' not found for target '%s'\n", attr, path);
+		else if (ret == EMSGSIZE)
+			printf("Wrong size %zu for attribute '%s'\n", size, attr);
+		else if (ret == EIO)
+			printf("Failed to store attribute '%s'\n", attr);
 
-		free(path);
-		free(value);
 		return FAPI2_RC_FALSE;
 	}
 
-	attr_decode(&attrib, value, len);
-	free(value);
-	if ((unsigned int)attrib.size != size) {
-		printf("Wrong size (%zu, expected %d) for attribute '%s'\n", size, attrib.size, attr);
-		free(path);
-		free(attrib.value);
-		return FAPI2_RC_FALSE;
-	}
-
-	free(attrib.value);
-	attrib.value = (uint8_t *)val;
-
-	attr_encode(&attrib, &value, &len);
-
-	ret = fdt_prop_write(fdt, path, attr, value, len);
-	if (ret != 0) {
-		if (ret == 1)
-			printf("Target %s not found\n", path);
-		else if (ret == 2)
-			printf("Attribute '%s' not found for target '%s'\n", attr, path);
-
-		free(path);
-		return FAPI2_RC_FALSE;
-	}
-
-	free(path);
 	return FAPI2_RC_SUCCESS;
 }
 
 ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
 {
-	struct attr attrib;
-	uint8_t *value;
-	char *path;
-	int len, ret;
+	const char *path;
+	int ret;
 
 	/* NULL targets use pdbg_dt_root */
 	if (!tgt) {
@@ -177,50 +139,20 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 		tgt = pdbg_target_root();
 	}
 
-	if (!fdt) {
-		printf("FDT not initialized\n");
-		return FAPI2_RC_FALSE;
-	}
-
 	path = pdbg_target_path(tgt);
 	assert(path);
 
-	/* Maximum header size is 4 words */
-	len = size + 16;
-	value = (uint8_t *)malloc(len);
-	assert(value);
-
-	ret = fdt_prop_read(fdt, path, attr, value, &len);
+	ret = attr_read(tgt, attr, val, size);
 	if (ret != 0) {
-		if (ret == 1)
-			printf("Target %s not found\n", path);
-		else if (ret == 2)
+		if (ret == ENOENT)
 			printf("Attribute '%s' not found for target '%s'\n", attr, path);
+		else if (ret == EMSGSIZE)
+			printf("Wrong size %zu for attribute '%s'\n", size, attr);
 
-		free(path);
-		free(value);
 		return FAPI2_RC_FALSE;
 	}
-
-	free(path);
-
-	attr_decode(&attrib, value, len);
-	free(value);
-	if ((unsigned int)attrib.size != size) {
-		printf("Wrong size (%zu, expected %d) for attribute '%s'\n", size, attrib.size, attr);
-		free(attrib.value);
-		return FAPI2_RC_FALSE;
-	}
-
-	memcpy(val, attrib.value, size);
-	free(attrib.value);
 
 	return FAPI2_RC_SUCCESS;
 }
 
-}
-
-void plat_set_fdt(void *fdt)
-{
-	fapi2::fdt = fdt;
 }

@@ -41,14 +41,9 @@ if test x"$ac_cv_lib_pdbg_pdbg_targets_init" != xyes ; then
 	AC_MSG_ERROR([Unable to find pdbg library])
 fi
 
-AC_CHECK_LIB([fdt-prop], [fdt_prop_read], [LIBS="-lfdt-prop $LIBS"])
-if test x"$ac_cv_lib_fdt_prop_fdt_prop_read" != xyes ; then
-	AC_MSG_ERROR([Unable to find fdt-prop library])
-fi
-
-AC_CHECK_LIB([attribute-format], [attr_encode], [LIBS="-lattribute-format $LIBS"])
-if test x"$ac_cv_lib_attribute_format_attr_encode" != xyes ; then
-	AC_MSG_ERROR([Unable to find attribute-format library])
+AC_CHECK_LIB([attribute-api], [attr_read], [LIBS="-lattribute-api $LIBS"])
+if test x"$ac_cv_lib_attribute_api_attr_read" != xyes ; then
+	AC_MSG_ERROR([Unable to find attribute-api library])
 fi
 
 m4_syscmd([make -f Makefile.generate > Makefile.proc.am])

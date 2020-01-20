@@ -12,14 +12,9 @@ extern "C" {
 
 int libekb_init(void)
 {
-	struct pdbg_dtb dtb;
-
 	if (!pdbg_targets_init(NULL)) {
 		return -1;
 	}
-
-	pdbg_default_dtb(&dtb, NULL);
-	plat_set_fdt(dtb.system);
 
 	return 0;
 }
