@@ -29,6 +29,7 @@
 #include <utils.H>
 #include <assert.h>
 #include <time.h>
+#include <errno.h>
 
 extern "C" {
 #include <attribute/attribute_api.h>
@@ -86,7 +87,7 @@ ReturnCode delay(uint64_t i_nanoSeconds, uint64_t i_simCycles, bool i_fixed)
 
     do {
 	    rc = nanosleep(&delay, &delay);
-    } while (rc == -EINTR);
+    } while (rc == -1 && errno == EINTR);
 
     if (rc)
 	    return FAPI2_RC_FALSE;
