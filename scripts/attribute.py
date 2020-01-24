@@ -334,7 +334,7 @@ class AttributeDatabase:
         return [int(i) for i in idlist_str]
 
     def read(self):
-        self.fd = file(self.filename, 'r')
+        self.fd = open(self.filename, 'r')
         ac = AttributeCollection()
         alist = self.read_all()
         for a in alist:
@@ -348,7 +348,7 @@ class AttributeDatabase:
         return ac
 
     def write(self, ac):
-        self.fd = file(self.filename, 'w')
+        self.fd = open(self.filename, 'w')
         alist = ac.attributes('all')
         tlist = ac.targets()
         self.write_all(alist)
