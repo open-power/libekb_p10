@@ -140,6 +140,7 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    libekb.H \
 		    hwpf/fapi2/src/fapi2_utils.C \
 		    hwpf/fapi2/src/plat/plat_utils.C \
+		    hwpf/fapi2/src/plat/target.C \
 		    ekb/hwpf/fapi2/src/error_info.C \
 		    ekb/hwpf/fapi2/src/ffdc.C \
 		    $(ATTRIB_HEADER) \
