@@ -160,6 +160,8 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 			printf("Attribute '%s' not found for target '%s'\n", attr, path);
 		else if (ret == EMSGSIZE)
 			printf("Wrong size %zu for attribute '%s'\n", size, attr);
+		else if (ret == EINVAL)
+			printf("Value not set for attribute '%s'\n", attr);
 
 		return FAPI2_RC_FALSE;
 	}
