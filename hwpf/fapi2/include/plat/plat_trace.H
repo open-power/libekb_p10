@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <libekb.H>
 
 // Why not a #define, why is this in the fapi2 namespace?
 // To prevent problems with Cronus and the fapi1 definitions.
@@ -40,26 +41,26 @@ static const uint32_t MAX_ECMD_STRING_LEN = 64;
 };
 
 // Information traces (go into fast trace buffer that can wrap often)
-#define FAPI_TRACE(_id_, _fmt_, _args_...)                              \
-    printf("%s: %s:%d ", _id_, __func__, __LINE__);                     \
-    printf(_fmt_, ##_args_);                                            \
-    printf("\n")
+#define FAPI_TRACE(_level_, _id_, _fmt_, _args_...)                              \
+    libekb_log(_level_, "%s: %s:%d ", _id_, __func__, __LINE__);                 \
+    libekb_log(_level_, _fmt_, ##_args_);                                        \
+    libekb_log(_level_, "\n")
 
-#define FAPI_INF(_fmt_, _args_...) FAPI_TRACE("inf", _fmt_, ##_args_)
+#define FAPI_INF(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_INF, "inf", _fmt_, ##_args_)
 
 // Important traces (go into slow trace buffer that should not wrap often)
-#define FAPI_IMP(_fmt_, _args_...) FAPI_TRACE("imp", _fmt_, ##_args_)
+#define FAPI_IMP(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_IMP, "imp", _fmt_, ##_args_)
 
 // Error traces (go into slow trace buffer that should not wrap often)
-#define FAPI_ERR(_fmt_, _args_...) FAPI_TRACE("err", _fmt_, ##_args_)
+#define FAPI_ERR(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_ERR, "err", _fmt_, ##_args_)
 
 // Debug traces (go into fast trace buffer that can wrap often)
-#define FAPI_DBG(_fmt_, _args_...) FAPI_TRACE("dbg", _fmt_, ##_args_)
+#define FAPI_DBG(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_DBG, "dbg", _fmt_, ##_args_)
 
 // Scan traces
-#define FAPI_SCAN(_fmt_, _args_...) FAPI_TRACE("scan", _fmt_, ##_args_)
+#define FAPI_SCAN(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_SCAN, "scan", _fmt_, ##_args_)
 
-#define FAPI_MFG(_fmt_, _args_...) FAPI_TRACE("mfg", _fmt_, ##_args_)
+#define FAPI_MFG(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_MFG, "mfg", _fmt_, ##_args_)
 
 #define FAPI_LAB(__fmt_, _args_...) \
     printf(_fmt_, ##_args_);    \
