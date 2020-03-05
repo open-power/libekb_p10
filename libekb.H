@@ -1,6 +1,10 @@
 #ifndef __LIBEKB_H__
 #define __LIBEKB_H__
 
+#include <vector>
+#include <string>
+#include <utility>
+
 #define LIBEKB_LOG_ERR   0
 #define LIBEKB_LOG_INF   1
 #define LIBEKB_LOG_IMP   2
@@ -18,7 +22,8 @@ int libekb_init(void);
 void libekb_set_logfunc(libekb_log_func_t fn, void *private_data);
 void libekb_set_loglevel(int loglevel);
 void libekb_log(int loglevel, const char *fmt, ...);
-
 }
 
+using FFDCData = std::vector<std::pair<std::string, std::string>>;
+FFDCData libekb_get_ffdc();
 #endif /* __LIBEKB_H__ */

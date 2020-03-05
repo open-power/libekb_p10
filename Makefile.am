@@ -65,6 +65,17 @@ $(ERROR_INFO_DIR)/hwp_error_info.H: $(ERROR_INFO_XML)
 
 $(ERROR_INFO_HEADER): $(ERROR_INFO_DIR)/hwp_error_info.H
 
+#The PLAT HWP Error Parser file generated from Error XML files
+ERROR_PARSER_DIR = $(srcdir)/hwpf/fapi2/include/error_info
+ERROR_PARSER_XML = \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml
+ERROR_PARSER_HEADER = \
+	$(ERROR_PARSER_DIR)/platHwpErrParser.H \
+	$(ERROR_PARSER_DIR)/platHwpErrParserFFDC.H
+$(ERROR_PARSER_HEADER): $(ERROR_PARSER_XML)
+	@$(MKDIR_P) $(ERROR_PARSER_DIR)
+	$(srcdir)/hwpf/fapi2/tools/platCreateHwpErrParser.pl --output-dir=$(ERROR_PARSER_DIR) $(ERROR_PARSER_XML)
+
 HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/hwp_executor.H \
 	$(srcdir)/hwpf/fapi2/include/plat_attribute_service.H \
@@ -94,7 +105,8 @@ BUILT_SOURCES = \
 	$(ATTRIB_HEADER) \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
-	$(ERROR_INFO_DIR)/hwp_error_info.H
+	$(ERROR_INFO_DIR)/hwp_error_info.H \
+	$(ERROR_PARSER_HEADER)
 
 if BUILD_DB
 data_DATA = p10_attributes.db
@@ -131,7 +143,10 @@ nobase_include_HEADERS = \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
 	$(ERROR_INFO_DIR)/hwp_error_info.H \
-	$(HWPF_HEADER)
+	$(HWPF_HEADER) \
+	hwpf/fapi2/include/hwp_pel_data.H \
+	$(ERROR_PARSER_HEADER)
+
 include_HEADERS = libekb.H
 
 libekb_la_SOURCES = $(PROCEDURES) \
@@ -148,7 +163,8 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    $(ERROR_INFO_HEADER) \
 		    $(ERROR_INFO_DIR)/hwp_error_info.H \
 		    hwpf/fapi2/include/error_info/collect_reg_ffdc_regs.C \
-		    $(HWPF_HEADER)
+		    $(HWPF_HEADER) \
+		    $(ERROR_PARSER_HEADER)
 
 libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
 

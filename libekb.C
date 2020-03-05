@@ -11,6 +11,11 @@ extern "C" {
 
 #include "libekb.H"
 
+#include <platHwpErrParser.H>
+#include <platHwpErrParserFFDC.H>
+#include <return_code.H>
+#include <hwp_pel_data.H>
+
 static libekb_log_func_t __libekb_log_fn;
 static void *__libekb_log_priv;
 static int __libekb_log_level = LIBEKB_LOG_DBG;
@@ -105,3 +110,34 @@ void libekb_log(int loglevel, const char *fmt, ...)
 	__libekb_log_fn(__libekb_log_priv, fmt, ap);
 	va_end(ap);
 }
+
+FFDCData libekb_get_ffdc()
+{
+	fapi2::ReturnCode rc =  fapi2::current_err;
+	FFDCData ffdc;
+	if (rc == fapi2::FAPI2_RC_SUCCESS) {
+		return ffdc;
+	}
+
+	// For PLAT and FAPI error simply return with empty data
+	if (rc.getCreator() == fapi2::ReturnCode::CREATOR_FAPI ||
+		rc.getCreator() == fapi2::ReturnCode::CREATOR_PLAT) {
+		return ffdc;
+	}
+
+	fapi2::PELData pelData = fapi2::parseHwpRc(rc);
+	ffdc.insert(ffdc.end(), pelData.begin(), pelData.end());
+
+	// Iterate through the FFDC sections, adding each to the error log
+	const fapi2::ErrorInfo* errorInfo = rc.getErrorInfo();
+	for (auto error : errorInfo->iv_ffdcs) {
+		uint32_t ffdcId = error->getFfdcId();
+		uint32_t size;
+		auto errData = error->getData(size);
+		FFDCData hwpFFDC = fapi2::parseHwpFfdc(ffdcId, errData, size);
+		ffdc.insert(ffdc.end(), hwpFFDC.begin(), hwpFFDC.end());
+	}
+
+	return ffdc;
+}
+
