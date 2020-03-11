@@ -13,7 +13,7 @@ extern "C" {
 
 static libekb_log_func_t __libekb_log_fn;
 static void *__libekb_log_priv;
-static int __libekb_log_level;
+static int __libekb_log_level = LIBEKB_LOG_DBG;
 
 struct {
 	int libekb_loglevel;
@@ -55,15 +55,16 @@ static void libekb_pdbg_log(int loglevel, const char *fmt, va_list ap)
 
 int libekb_init(void)
 {
+	if (!__libekb_log_fn)
+		libekb_set_logfunc(libekb_log_default, NULL);
+
+	pdbg_set_logfunc(libekb_pdbg_log);
+
+	libekb_set_loglevel(__libekb_log_level);
+
 	if (!pdbg_targets_init(NULL)) {
 		return -1;
 	}
-
-	pdbg_set_logfunc(libekb_pdbg_log);
-	pdbg_set_loglevel(PDBG_DEBUG);
-
-	libekb_set_logfunc(libekb_log_default, NULL);
-	libekb_set_loglevel(LIBEKB_LOG_DBG);
 
 	return 0;
 }
