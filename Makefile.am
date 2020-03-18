@@ -5,7 +5,7 @@ ARFLAGS = crDPST
 
 EKB = $(srcdir)/ekb
 
-ATTRIB_DIR = $(srcdir)/hwpf/fapi2/include/attributes
+ATTRIB_DIR = ./hwpf/fapi2/include/attributes
 ATTRIB_HEADER = \
 	$(ATTRIB_DIR)/attribute_ids.H \
 	$(ATTRIB_DIR)/attribute_plat_check.H \
@@ -52,7 +52,7 @@ $(ATTRIB_DIR)/platform_attrs.h: $(ATTRIB_DIR)/attribute_plat_check.H
 	grep "#ifndef \(.*\)" $< | sed -e "s/#ifndef \(.*\)_\(.*\)/#ifndef \1_\2\n#define \1_\2(id, tgt, val) plat_access_attr_\2(\"\1\", tgt, \&val, sizeof(fapi2::\1_Type))\n#endif/" > $@
 
 ERROR_INFO_XML = $(EKB)/chips/p10/procedures/xml/error_info/*.xml
-ERROR_INFO_DIR = $(srcdir)/hwpf/fapi2/include/error_info
+ERROR_INFO_DIR = ./hwpf/fapi2/include/error_info
 ERROR_INFO_HEADER = \
 	$(ERROR_INFO_DIR)/hwp_ffdc_classes.H \
 	$(ERROR_INFO_DIR)/hwp_return_codes.H \
@@ -111,11 +111,11 @@ LOCALCFLAGS = $(OPTFLAGS) -g -Wall -std=gnu11 $(TARGET_ENDIAN)
 LOCALCXXFLAGS = $(OPTFLAGS) -Wall -std=gnu++11 \
 		-fpermissive -fno-exceptions -fno-rtti \
 		$(TARGET_ENDIAN) \
+		-I$(ATTRIB_DIR) \
+		-I$(ERROR_INFO_DIR) \
 		-I$(srcdir) \
 		-I$(srcdir)/src \
 		-I$(srcdir)/hwpf/fapi2/include \
-		-I$(srcdir)/hwpf/fapi2/include/attributes \
-		-I$(srcdir)/hwpf/fapi2/include/error_info \
 		-I$(srcdir)/hwpf/fapi2/include/plat \
 		-I$(srcdir)/ekb/hwpf/fapi2/include \
 		-I$(srcdir)/ekb/chips/p10/common/include \
