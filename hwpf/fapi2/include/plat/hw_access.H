@@ -243,6 +243,26 @@ inline ReturnCode putScomUnderMask(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_
 	return FAPI2_RC_SUCCESS;
 }
 
+/* Returns the pib target for the given proc chip or NULL in case of
+ * error. */
+inline struct pdbg_target *get_fsi_target(struct pdbg_target *proc)
+{
+	struct pdbg_target *fsi = NULL;
+
+	/* We assume each processor chip contains one and only one pib */
+	pdbg_for_each_target("fsi", proc, fsi) {
+		break;
+	}
+
+	if (!fsi) {
+		FAPI_ERR("No fsi target associated with processor %s\n",
+			 pdbg_target_path(proc));
+		return NULL;
+	}
+
+	return fsi;
+}
+
 ///
 /// @brief Platform-level implementation called by getCfamRegister()
 /// Hardware procedures writers will not call this function.
@@ -257,16 +277,14 @@ inline ReturnCode getCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_t
                                   const uint32_t i_address,
                                   buffer<uint32_t>& o_data)
 {
-	struct pdbg_target *proc, *target = i_target;
+	struct pdbg_target *fsi, *proc = i_target;
 	uint32_t data;
 	int rc;
 
-	proc = pdbg_parent(target, NULL);
-	pdbg_for_each_target("fsi", proc, target) {
-		break;
-	}
+	if (!(fsi = get_fsi_target(proc)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = fsi_read(target, i_address, &data);
+	rc = fsi_read(fsi, i_address, &data);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
@@ -298,15 +316,13 @@ inline ReturnCode putCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_t
                                   const uint32_t i_address,
                                   const buffer<uint32_t> i_data)
 {
-	struct pdbg_target *proc, *target = i_target;
+	struct pdbg_target *fsi, *proc = i_target;
 	int rc;
 
-	proc = pdbg_parent(target, NULL);
-	pdbg_for_each_target("fsi", proc, target) {
-		break;
-	}
+	if (!(fsi = get_fsi_target(proc)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = fsi_write(target, i_address, i_data);
+	rc = fsi_write(fsi, i_address, i_data);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
