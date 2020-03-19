@@ -119,6 +119,46 @@ inline ReturnCode getScom(const Target<K, M, V>& i_target,
 	return FAPI2_RC_SUCCESS;
 }
 
+/* Returns the pib target for the given proc chip or NULL in case of
+ * error. */
+inline struct pdbg_target *get_pib_target(struct pdbg_target *proc)
+{
+	struct pdbg_target *pib = NULL;
+
+	/* We assume each processor chip contains one and only one pib */
+	pdbg_for_each_target("pib", proc, pib) {
+		break;
+	}
+
+	if (!pib) {
+		FAPI_ERR("No pib target associated with processor %s\n",
+			 pdbg_target_path(proc));
+		return NULL;
+	}
+
+	return pib;
+}
+
+template< MulticastType M, typename V >
+inline ReturnCode getScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
+                          const uint64_t i_address,
+                          buffer<uint64_t>& o_data)
+{
+	struct pdbg_target *pib, *proc = i_target;
+	uint64_t data;
+	int rc;
+
+	if (!(pib = get_pib_target(proc)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = pib_read(pib, i_address, &data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	o_data = data;
+	return FAPI2_RC_SUCCESS;
+}
+
 /// @brief Platform-level implementation of putScom()
 /// @tparam K template parameter, passed in target.
 /// @param[in] i_target     HW target to operate on.
@@ -134,6 +174,25 @@ inline ReturnCode putScom(const Target<K, M, V>& i_target,
 	int rc;
 
 	rc = pib_write(target, i_address, i_data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
+}
+
+template< MulticastType M, typename V >
+inline ReturnCode putScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
+                          const uint64_t i_address,
+                          const buffer<uint64_t> i_data)
+{
+	struct pdbg_target *pib, *proc = i_target;
+	uint64_t data;
+	int rc;
+
+	if (!(pib = get_pib_target(proc)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = pib_write(pib, i_address, i_data);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
@@ -158,6 +217,26 @@ inline ReturnCode putScomUnderMask(const Target<K, M, V>& i_target,
 	int rc;
 
 	rc = pib_write_mask(target, i_address, i_data, i_mask);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
+}
+
+template< MulticastType M, typename V >
+inline ReturnCode putScomUnderMask(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
+                                   const uint64_t i_address,
+                                   const buffer<uint64_t> i_data,
+                                   const buffer<uint64_t> i_mask)
+{
+	struct pdbg_target *pib, *proc = i_target;
+	uint64_t data;
+	int rc;
+
+	if (!(pib = get_pib_target(proc)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = pib_write_mask(pib, i_address, i_data, i_mask);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
