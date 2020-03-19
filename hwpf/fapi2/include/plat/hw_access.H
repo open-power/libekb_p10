@@ -224,26 +224,6 @@ inline ReturnCode putCfamRegister(const Target<K, M, V>& i_target,
 	return FAPI2_RC_SUCCESS;
 }
 
-
-///
-/// @brief Platform-level implementation of modifyCfamRegister()
-/// Hardware procedures writers will not call this function.
-/// @tparam K template parameter, passed in target.
-/// @param[in]  i_target     HW target to operate on.
-/// @param[in]  i_address    CFAM register address to modify.
-/// @param[out] i_data       32-bit buffer that holds data to modify.
-/// @param[in]  i_modifyMode The modify mode (or/and/xor).
-/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode modifyCfamRegister(const Target<K, M, V>& i_target,
-                                     const uint32_t i_address,
-                                     const buffer<uint32_t> i_data,
-                                     const fapi2::ChipOpModifyMode i_modifyMode)
-{
-    return FAPI2_RC_SUCCESS;
-}
-
 /// @brief Platform-level implementation  of putRing()
 /// Hardware procedures writers will not call this function.
 /// @tparam K template parameter, passed in target.
