@@ -79,7 +79,6 @@ $(ERROR_PARSER_HEADER): $(ERROR_PARSER_XML)
 HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/hwp_executor.H \
 	$(srcdir)/hwpf/fapi2/include/plat_attribute_service.H \
-	$(srcdir)/hwpf/fapi2/include/return_code_defs.H \
 	$(srcdir)/hwpf/fapi2/include/plat/hw_access.H \
 	$(srcdir)/hwpf/fapi2/include/plat/i2c_access.H \
 	$(srcdir)/hwpf/fapi2/include/plat/mmio_access.H \
