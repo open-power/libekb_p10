@@ -153,15 +153,11 @@ inline ReturnCode putScomUnderMask(const Target<K, M, V>& i_target,
                                    const buffer<uint64_t> i_data,
                                    const buffer<uint64_t> i_mask)
 {
+	struct pdbg_target *target = i_target;
 	uint64_t data;
 	int rc;
 
-	rc = pib_read(i_target, i_address, &data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
-
-	data = (data & ~i_mask) | (i_data & i_mask);
-	rc = pib_write(i_target, i_address, data);
+	rc = pib_write_mask(target, i_address, i_data, i_mask);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
