@@ -173,8 +173,8 @@ inline ReturnCode putScomUnderMask(const Target<K, M, V>& i_target,
 /// @param[out] o_data     32-bit buffer that holds data read from HW target.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode getCfamRegister(const Target<K, M, V>& i_target,
+template< MulticastType M, typename V >
+inline ReturnCode getCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
                                   const uint32_t i_address,
                                   buffer<uint32_t>& o_data)
 {
@@ -195,6 +195,16 @@ inline ReturnCode getCfamRegister(const Target<K, M, V>& i_target,
 	return FAPI2_RC_SUCCESS;
 }
 
+template< MulticastType M, typename V >
+inline ReturnCode getCfamRegister(const Target<TARGET_TYPE_MEMBUF_CHIP, M, V>& i_target,
+                                  const uint32_t i_address,
+                                  buffer<uint32_t>& o_data)
+{
+	FAPI_ERR("CFAM access for memory buffer chips not implemented on this platform\n");
+
+	return FAPI2_RC_FALSE;
+}
+
 ///
 /// @brief Platform-level implementation of putCfamRegister()
 /// Hardware procedures writers will not call this function.
@@ -204,8 +214,8 @@ inline ReturnCode getCfamRegister(const Target<K, M, V>& i_target,
 /// @param[out] i_data     32-bit buffer that holds data to write into address.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode putCfamRegister(const Target<K, M, V>& i_target,
+template< MulticastType M, typename V >
+inline ReturnCode putCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
                                   const uint32_t i_address,
                                   const buffer<uint32_t> i_data)
 {
