@@ -65,15 +65,15 @@ $(ERROR_INFO_HEADER): $(ERROR_INFO_XML)
 	$(EKB)/hwpf/fapi2/tools/parseErrorInfo_p10.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
 
 #The PLAT HWP Error Parser file generated from Error XML files
-ERROR_PARSER_DIR = $(srcdir)/hwpf/fapi2/include/error_info
 ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml
 ERROR_PARSER_HEADER = \
-	$(ERROR_PARSER_DIR)/platHwpErrParser.H \
-	$(ERROR_PARSER_DIR)/platHwpErrParserFFDC.H
+	$(ERROR_INFO_DIR)/platHwpErrParser.H \
+	$(ERROR_INFO_DIR)/platHwpErrParserFFDC.H
+
 $(ERROR_PARSER_HEADER): $(ERROR_PARSER_XML)
-	@$(MKDIR_P) $(ERROR_PARSER_DIR)
-	$(srcdir)/hwpf/fapi2/tools/platCreateHwpErrParser.pl --output-dir=$(ERROR_PARSER_DIR) $(ERROR_PARSER_XML)
+	@$(MKDIR_P) $(ERROR_INFO_DIR)
+	$(srcdir)/hwpf/fapi2/tools/platCreateHwpErrParser.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_PARSER_XML)
 
 HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/hwp_executor.H \
