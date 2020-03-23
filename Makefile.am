@@ -55,15 +55,14 @@ ERROR_INFO_XML = $(EKB)/chips/p10/procedures/xml/error_info/*.xml
 ERROR_INFO_DIR = ./hwpf/fapi2/include/error_info
 ERROR_INFO_HEADER = \
 	$(ERROR_INFO_DIR)/hwp_ffdc_classes.H \
+	$(ERROR_INFO_DIR)/hwp_error_info.H \
 	$(ERROR_INFO_DIR)/hwp_return_codes.H \
 	$(ERROR_INFO_DIR)/set_sbe_error_funcs.H \
 	$(ERROR_INFO_DIR)/set_sbe_error.H
 
-$(ERROR_INFO_DIR)/hwp_error_info.H: $(ERROR_INFO_XML)
+$(ERROR_INFO_HEADER): $(ERROR_INFO_XML)
 	@$(MKDIR_P) $(ERROR_INFO_DIR)
 	$(EKB)/hwpf/fapi2/tools/parseErrorInfo_p10.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
-
-$(ERROR_INFO_HEADER): $(ERROR_INFO_DIR)/hwp_error_info.H
 
 #The PLAT HWP Error Parser file generated from Error XML files
 ERROR_PARSER_DIR = $(srcdir)/hwpf/fapi2/include/error_info
@@ -104,7 +103,6 @@ BUILT_SOURCES = \
 	$(ATTRIB_HEADER) \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
-	$(ERROR_INFO_DIR)/hwp_error_info.H \
 	$(ERROR_PARSER_HEADER)
 
 if BUILD_DB
@@ -141,7 +139,6 @@ nobase_include_HEADERS = \
 	$(ATTRIB_HEADER) \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
-	$(ERROR_INFO_DIR)/hwp_error_info.H \
 	$(HWPF_HEADER) \
 	hwpf/fapi2/include/hwp_pel_data.H \
 	$(ERROR_PARSER_HEADER)
@@ -160,7 +157,6 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    $(ATTRIB_HEADER) \
 		    $(ATTRIB_DIR)/platform_attrs.h \
 		    $(ERROR_INFO_HEADER) \
-		    $(ERROR_INFO_DIR)/hwp_error_info.H \
 		    hwpf/fapi2/include/error_info/collect_reg_ffdc_regs.C \
 		    $(HWPF_HEADER) \
 		    $(ERROR_PARSER_HEADER)
@@ -169,8 +165,7 @@ libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
 
 $(PROCEDURES): $(ATTRIB_HEADER) \
 	       $(ATTRIB_DIR)/platform_attrs.h \
-	       $(ERROR_INFO_HEADER) \
-	       $(ERROR_INFO_DIR)/hwp_error_info.H
+	       $(ERROR_INFO_HEADER)
 
 #		   ekb/chips/p10/xip/p10_xip_image.C \
 #		   ekb/chips/p10/utils/imageProcs/p10_dd_container.c \
