@@ -60,7 +60,7 @@ ERROR_INFO_HEADER = \
 	$(ERROR_INFO_DIR)/set_sbe_error_funcs.H \
 	$(ERROR_INFO_DIR)/set_sbe_error.H
 
-$(ERROR_INFO_HEADER): $(ERROR_INFO_XML)
+$(ERROR_INFO_HEADER) $(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C: $(ERROR_INFO_XML)
 	@$(MKDIR_P) $(ERROR_INFO_DIR)
 	$(EKB)/hwpf/fapi2/tools/parseErrorInfo_p10.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
 
@@ -103,6 +103,7 @@ BUILT_SOURCES = \
 	$(ATTRIB_HEADER) \
 	$(ATTRIB_DIR)/platform_attrs.h \
 	$(ERROR_INFO_HEADER) \
+	$(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C \
 	$(ERROR_PARSER_HEADER)
 
 if BUILD_DB
