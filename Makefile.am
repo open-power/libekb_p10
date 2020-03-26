@@ -166,11 +166,3 @@ libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
 $(PROCEDURES): $(ATTRIB_HEADER) \
 	       $(ATTRIB_DIR)/platform_attrs.h \
 	       $(ERROR_INFO_HEADER)
-
-#		   ekb/chips/p10/xip/p10_xip_image.C \
-#		   ekb/chips/p10/utils/imageProcs/p10_dd_container.c \
-#		   ekb/chips/common/utils/imageProcs/common_ringId.C \
-#		   ekb/chips/p10/utils/imageProcs/p10_ringId.C \
-#		   ekb/chips/p10/utils/imageProcs/p10_tor.C \
-#		   ekb/chips/p10/utils/imageProcs/p10_scan_compression.C \
-#		   ekb/chips/p10/utils/p10_putRingUtils.C
