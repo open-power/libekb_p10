@@ -106,8 +106,16 @@ BUILT_SOURCES = \
 	$(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C \
 	$(ERROR_PARSER_HEADER)
 
+CLEANFILES = \
+	$(ATTRIB_HEADER) \
+	$(ATTRIB_DIR)/platform_attrs.h \
+	$(ERROR_INFO_HEADER) \
+	$(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C \
+	$(ERROR_PARSER_HEADER)
+
 if BUILD_DB
 data_DATA = p10_attributes.db
+CLEANFILES += p10_attributes.db
 endif
 
 include Makefile.proc.am
