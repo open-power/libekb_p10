@@ -32,7 +32,7 @@
 #include <errno.h>
 
 extern "C" {
-#include <attribute/attribute_api.h>
+#include <libpdbg.h>
 }
 
 namespace fapi2
@@ -107,11 +107,8 @@ void Assert(bool i_expression)
 
 thread_local ReturnCode current_err;
 
-ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
+ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, uint32_t size, uint32_t count, void *val)
 {
-	const char *path;
-	int ret;
-
 	/* NULL targets use pdbg_dt_root */
 	if (!tgt) {
 	 	/* TODO: This should never happen but we've only got a partial
@@ -120,32 +117,16 @@ ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, 
 		tgt = pdbg_target_root();
 	}
 
-	path = pdbg_target_path(tgt);
-	assert(path);
-
-	ret = attr_write(tgt, attr, val, size);
-	if (ret != 0) {
-		printf("Target = %s\n", path);
-		if (ret == ENOENT)
-			printf("Attribute '%s' not found for target '%s'\n", attr, path);
-		else if (ret == EMSGSIZE)
-			printf("Wrong size %zu for attribute '%s'\n", size, attr);
-		else if (ret == EIO)
-			printf("Failed to store attribute '%s'\n", attr);
-		else
-			printf("Unknown error %d writing attribute '%s'\n", ret, attr);
-
+	if (!pdbg_target_set_attribute(tgt, attr, size, count, val)) {
+		fprintf(stderr, "Failed to write attribute %s\n", attr);
 		return FAPI2_RC_FALSE;
 	}
 
 	return FAPI2_RC_SUCCESS;
 }
 
-ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size)
+ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, uint32_t size, uint32_t count, void *val)
 {
-	const char *path;
-	int ret;
-
 	/* NULL targets use pdbg_dt_root */
 	if (!tgt) {
 	 	/* TODO: This should never happen but we've only got a partial
@@ -154,21 +135,8 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 		tgt = pdbg_target_root();
 	}
 
-	path = pdbg_target_path(tgt);
-	assert(path);
-
-	ret = attr_read(tgt, attr, val, size);
-	if (ret != 0) {
-		printf("Target = %s\n", path);
-		if (ret == ENOENT)
-			printf("Attribute '%s' not found for target '%s'\n", attr, path);
-		else if (ret == EMSGSIZE)
-			printf("Wrong size %zu for attribute '%s'\n", size, attr);
-		else if (ret == EINVAL)
-			printf("Value not set for attribute '%s'\n", attr);
-		else
-			printf("Unknown error %d reading attribute '%s'\n", ret, attr);
-
+	if (!pdbg_target_get_attribute(tgt, attr, size, count, val)) {
+		fprintf(stderr, "Failed to read attribute %s\n", attr);
 		return FAPI2_RC_FALSE;
 	}
 

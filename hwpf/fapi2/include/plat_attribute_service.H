@@ -55,8 +55,8 @@ extern "C" {
 /* Haven't figured out how to deal with attributes yet */
 
 namespace fapi2 {
-	ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size);
-	ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, void *val, size_t size);
+	ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, uint32_t size, uint32_t count, void *val);
+	ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, uint32_t size, uint32_t count, void *val);
 }
 
 #include "platform_attrs.h"
