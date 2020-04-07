@@ -24,6 +24,19 @@ class AttributeError(Exception):
         return str(self)
 
 
+def data_size(data_type):
+    if data_type == 'int8' or data_type == 'uint8':
+        return 1
+    elif data_type == 'int16' or data_type == 'uint16':
+        return 2
+    elif data_type == 'int32' or data_type == 'uint32':
+        return 4
+    elif data_type == 'int64' or data_type == 'uint64':
+        return 8
+    else:
+        raise AttributeError('Invalid data type %s' % data_type)
+
+
 class Attribute:
     def __init__(self):
         self.__name = ''
@@ -186,6 +199,17 @@ class Attribute:
 
     def set_target(self, target):
         self.__target.append(target)
+
+    def gen_api(self):
+        str = '#ifndef %s_GETMACRO\n' % self.__name
+        str += '#define %s_GETMACRO(id, tgt, val)  %s("%s", tgt, %d, %d, &val)\n' % \
+              (self.__name, 'plat_access_attr_GETMACRO', self.__name, data_size(self.__datatype), self.__size)
+        str += '#endif\n'
+        str += '#ifndef %s_SETMACRO\n' % self.__name
+        str += '#define %s_SETMACRO(id, tgt, val)  %s("%s", tgt, %d, %d, &val)\n' % \
+              (self.__name, 'plat_access_attr_SETMACRO', self.__name, data_size(self.__datatype), self.__size)
+        str += '#endif\n'
+        return str
 
 
 class AttributeCollection:
@@ -389,6 +413,18 @@ def do_read(dbfile):
     ac.stats()
 
 
+def do_header(dbfile, fp):
+    db = AttributeDatabase(dbfile)
+    ac = db.read()
+    fp.write('/* This file is auto-generated from attribute.py */\n')
+    fp.write('#ifndef PLATFORM_ATTRS_H\n')
+    fp.write('#define PLATFORM_ATTRS_H\n')
+    for name in ac.attributes():
+        attr = ac.get_attribute(name)
+        fp.write(attr.gen_api())
+    fp.write('#endif /* PLATFORM_ATTRS_H */\n')
+
+
 if __name__ == '__main__':
 
     if len(sys.argv) < 3:
@@ -404,5 +440,12 @@ if __name__ == '__main__':
         do_parse(sys.argv[2], sys.argv[3:])
     elif sys.argv[1] == 'read':
         do_read(sys.argv[2])
+    elif sys.argv[1] == 'header':
+        outfile = sys.stdout
+        if len(sys.argv) == 4:
+            outfile = open(sys.argv[3], 'w')
+        do_header(sys.argv[2], outfile)
+        if len(sys.argv) == 4:
+            outfile.close()
     else:
         usage()
