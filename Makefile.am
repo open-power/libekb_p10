@@ -47,9 +47,9 @@ $(ATTRIB_HEADER): $(ATTRIB_XML)
 	@$(MKDIR_P) $(ATTRIB_DIR)
 	$(EKB)/hwpf/fapi2/tools/parseAttributeInfo.pl --output-dir=$(ATTRIB_DIR) $(ATTRIB_XML)
 
-$(ATTRIB_DIR)/platform_attrs.h: $(ATTRIB_DIR)/attribute_plat_check.H
+$(ATTRIB_DIR)/platform_attrs.h: p10_attributes.db
 	@$(MKDIR_P) $(ATTRIB_DIR)
-	grep "#ifndef \(.*\)" $< | sed -e "s/#ifndef \(.*\)_\(.*\)/#ifndef \1_\2\n#define \1_\2(id, tgt, val) plat_access_attr_\2(\"\1\", tgt, \&val, sizeof(fapi2::\1_Type))\n#endif/" > $@
+	$(AM_V_GEN)$(srcdir)/scripts/attribute.py header $< $@
 
 ERROR_INFO_XML = $(EKB)/chips/p10/procedures/xml/error_info/*.xml
 ERROR_INFO_DIR = ./hwpf/fapi2/include/error_info
