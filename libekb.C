@@ -18,44 +18,11 @@ extern "C" {
 
 static libekb_log_func_t __libekb_log_fn;
 static void *__libekb_log_priv;
-static int __libekb_log_level = LIBEKB_LOG_DBG;
-
-struct {
-	int libekb_loglevel;
-	int pdbg_loglevel;
-} libekb_pdbg_log_map[] = {
-	{ LIBEKB_LOG_ERR,  PDBG_ERROR },
-	{ LIBEKB_LOG_INF,  PDBG_INFO },
-	{ LIBEKB_LOG_IMP,  PDBG_DEBUG },
-	{ LIBEKB_LOG_MFG,  PDBG_DEBUG },
-	{ LIBEKB_LOG_SCAN, PDBG_DEBUG },
-	{ LIBEKB_LOG_DBG,  PDBG_DEBUG },
-	{ -1, -1 },
-};
-
-static int libekb_to_pdbg_loglevel(int libekb_loglevel)
-{
-	int i;
-
-	for (i=0; libekb_pdbg_log_map[i].libekb_loglevel != -1; i++) {
-		if (libekb_pdbg_log_map[i].libekb_loglevel == libekb_loglevel)
-			return libekb_pdbg_log_map[i].pdbg_loglevel;
-	}
-
-	return PDBG_ERROR;
-}
+static int __libekb_log_level = LIBEKB_LOG_ERR;
 
 static void libekb_log_default(void *priv, const char *fmt, va_list ap)
 {
 	vfprintf(stdout, fmt, ap);
-}
-
-static void libekb_pdbg_log(int loglevel, const char *fmt, va_list ap)
-{
-	if (!__libekb_log_fn)
-		return;
-
-	__libekb_log_fn(__libekb_log_priv, fmt, ap);
 }
 
 int libekb_init(void)
@@ -63,11 +30,8 @@ int libekb_init(void)
 	if (!__libekb_log_fn)
 		libekb_set_logfunc(libekb_log_default, NULL);
 
-	pdbg_set_logfunc(libekb_pdbg_log);
-
-	libekb_set_loglevel(__libekb_log_level);
-
-	if (!pdbg_targets_init(NULL)) {
+	if (!pdbg_target_root()) {
+		libekb_log(LIBEKB_LOG_ERR, "libpdbg not initialized\n");
 		return -1;
 	}
 
@@ -82,8 +46,6 @@ void libekb_set_logfunc(libekb_log_func_t fn, void *private_data)
 
 void libekb_set_loglevel(int loglevel)
 {
-	int pdbg_loglevel;
-
 	if (loglevel < LIBEKB_LOG_ERR)
 		loglevel = LIBEKB_LOG_ERR;
 
@@ -91,9 +53,6 @@ void libekb_set_loglevel(int loglevel)
 		loglevel = LIBEKB_LOG_DBG;
 
 	__libekb_log_level = loglevel;
-
-	pdbg_loglevel = libekb_to_pdbg_loglevel(loglevel);
-	pdbg_set_loglevel(pdbg_loglevel);
 }
 
 void libekb_log(int loglevel, const char *fmt, ...)
