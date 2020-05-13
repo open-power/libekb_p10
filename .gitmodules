@@ -1,4 +1,4 @@
 [submodule "ekb"]
 	path = ekb
-	url = ssh://git@github.ibm.com/openbmc/ekb.git
+	url = ssh://git@github.ibm.com/openbmc/pub-ekb.git
 	branch = master-p10
