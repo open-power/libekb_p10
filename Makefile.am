@@ -51,6 +51,9 @@ $(ATTRIB_DIR)/platform_attrs.h: p10_attributes.db
 	@$(MKDIR_P) $(ATTRIB_DIR)
 	$(AM_V_GEN)$(srcdir)/scripts/attribute.py header $< $@
 
+# Error info headers cannot be generated with parallel run
+.NOTPARALLEL:
+
 ERROR_INFO_XML = $(EKB)/chips/p10/procedures/xml/error_info/*.xml
 ERROR_INFO_DIR = ./hwpf/fapi2/include/error_info
 ERROR_INFO_HEADER = \
