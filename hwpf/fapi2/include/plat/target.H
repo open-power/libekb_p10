@@ -28,6 +28,9 @@
 #include <fapi2_target.H>
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <vector>
+#include <plat_trace.H>
 
 namespace fapi2
 {
@@ -158,40 +161,107 @@ Target<K, M, V>::getChildren(const TargetState i_state) const
 {
 	std::vector<Target<T>> targets;
 	struct pdbg_target *target = NULL;
-	const char *klass = getChildrenImpl<T>();
+	struct pdbg_target *cur_target = static_cast<struct pdbg_target *>(this->get());
 
-	pdbg_for_each_target(klass, iv_handle, target)
-		if (i_state == TARGET_STATE_PRESENT || Target(target).isFunctional())
-			targets.push_back(target);
+	if (T == fapi2::TARGET_TYPE_PERV)
+	{
+		// Adding only required hwp consumed child targets
+		std::vector<std::string> childname =
+			{"iohs", "mc", "pec", "core", "nmmu", "pauc", "pau"};
 
+		for(auto name : childname)
+		{
+			bool state = true;
+			pdbg_for_each_target(name.c_str(), cur_target, target) {
+				if (i_state == fapi2::TARGET_STATE_FUNCTIONAL) {
+					state = Target(target).isFunctional();
+				}
+				else if (i_state == fapi2::TARGET_STATE_PRESENT) {
+					state = isTargetPresent(Target(target));
+				}
+				//else default state return all.
+				if (state) {
+					targets.push_back(target);
+				}
+			}
+		}
+	}
+	else
+	{
+		const char *klass = getChildrenImpl<T>();
+
+		pdbg_for_each_target(klass, cur_target, target){
+			bool state = true;
+			if (i_state == fapi2::TARGET_STATE_FUNCTIONAL) {
+				 state = Target(target).isFunctional();
+			}
+			else if (i_state == TARGET_STATE_PRESENT) {
+				state = isTargetPresent(Target(target));
+			}
+			if (state) {
+				targets.push_back(target);
+			}
+		}
+	}
 	return targets;
 }
-// Specialization of getChildren, filtered for pervasive targets.
-template<>
-template<>
-inline std::vector<Target<TARGET_TYPE_PERV> >
-Target<TARGET_TYPE_PERV>::getChildren(const TargetFilter i_filter,
-                                      const TargetState i_state ) const
+
+// @brief Get this target's children, filtered
+// @tparam T The type of the parent
+// @tparam T_SELF The type of target on which this is called
+// @tparam V the type of the target's Value
+// @param[in] i_filter The desired chiplet filter
+// @param[in] i_state The desired TargetState of the children
+// @return std::vector<Target<T> > a vector of present/functional children
+
+template<TargetType T_SELF, MulticastType M, typename V>
+template< TargetType T>
+inline std::vector<Target<T, M, V> >
+	Target<T_SELF, M, V>::getChildren(const TargetFilter i_filter,
+		const TargetState i_state) const
 {
-	std::vector<Target<TARGET_TYPE_PERV>> targets;
-	struct pdbg_target *target = NULL;
+	std::vector<Target<T, M, V>> children;
 
-	/* HACK: This allows us to define implementations such that things
-	* build/link but that we don't have enough understanding of to
-	* actually implement yet in a way that will get noticed if
-	* actually used at runtime. */
+	// C++ wont support partial specialization template.
+	// Limit to getting Pervasive children from proc_chip parent for now
+	static_assert(((T == fapi2::TARGET_TYPE_PERV) &&
+		(T_SELF == fapi2::TARGET_TYPE_PROC_CHIP)),
+		"getChildren-Filter only supports getting TARGET_TYPE_PERV children on a TARGET_TYPE_PROC_CHIP");
 
-	pdbg_for_each_target("chiplet", iv_handle, target) {
-		if (!filter_ttype(target, i_filter))
-			continue;
+	FAPI_DBG("i_filter=0x%llX, T_SELF=0x%.8X, T=0x%.8X \n", i_filter,T_SELF, T);
 
-		if (i_state == TARGET_STATE_FUNCTIONAL && !Target(target).isFunctional())
-			continue;
+	children = this->getChildren<T>(i_state);
 
-		targets.push_back(target);
+	for(auto iter = children.begin(); iter != children.end();) {
+		uint64_t bitMask = 0x0;
+		struct pdbg_target * child =
+			static_cast<struct pdbg_target *>(iter->get());
+
+		// ATTR_CHIPLET_ID represents the Pervasive Chiplet numbering and is
+		// needed to create the l_bitMask to use against i_filter
+		uint8_t chiplet_id = 0;
+
+		if(!pdbg_target_get_attribute(child, "ATTR_CHIPLET_ID", 1, 1, &chiplet_id)) {
+			FAPI_ERR ("Can not read CHIPLET_ID attribute");
+			bitMask = 0xFFFFFFFFFFFFFFFF;
+		}
+		else
+		{
+			bitMask = 0x8000000000000000 >> chiplet_id;
+		}
+
+		if (i_filter & bitMask)
+		{
+			FAPI_DBG("keep child chiplet id=0x%.2X", chiplet_id);
+			++iter;
+		}
+		else
+		{
+			iter = children.erase(iter); // this increments childIter
+		}
 	}
 
-	return targets;
+	return children;
 }
 
 template<TargetType K, MulticastType M, typename V>
@@ -396,6 +466,19 @@ inline Target<T, M, V> getTarget(uint64_t Ordinal)
 {
     // For testing
     return Target<T, M, V>(Ordinal);
+}
+
+inline bool isTargetPresent(struct pdbg_target *target)
+{
+        uint8_t buf[5];
+
+        if (!pdbg_target_get_attribute_packed(target, "ATTR_HWAS_STATE", "41", 1, buf)) {
+                FAPI_ERR ("Can not read ATTR_HWAS_STATE attribute");
+                return false;
+        }
+
+        //isPresent bit is stored in 4th byte and bit 2 position in HWAS_STATE
+        return (buf[4] & 0x40);
 }
 
 }
