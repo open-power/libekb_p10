@@ -272,8 +272,15 @@ inline uint8_t
 Target<K, M, V>::getChipletNumber(void) const
 {
     static_assert((K & TARGET_TYPE_MULTICAST) == 0, "getChipletNumber is not supported for multicast targets");
-    // Platform can return the chiplet number stored in it's Target handle
-    return 0;
+
+    struct pdbg_target *target =  static_cast<struct pdbg_target *>(this->get());
+    uint8_t chiplet_id = 0;
+
+    if(!pdbg_target_get_attribute(target, "ATTR_CHIPLET_ID", 1, 1, &chiplet_id)) {
+         FAPI_ERR ("Can not read CHIPLET_ID attribute");
+    }
+
+    return chiplet_id;
 }
 
 #ifdef FAPI2_ENABLE_PLATFORM_GET_CORE_SELECT
