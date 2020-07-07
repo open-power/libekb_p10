@@ -186,7 +186,6 @@ inline ReturnCode putScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
                           const buffer<uint64_t> i_data)
 {
 	struct pdbg_target *pib, *proc = i_target;
-	uint64_t data;
 	int rc;
 
 	if (!(pib = get_pib_target(proc)))
