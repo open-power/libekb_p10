@@ -255,9 +255,16 @@ template<TargetType K, MulticastType M, typename V>
 inline bool
 Target<K, M, V>::isFunctional(void) const
 {
-    // Platform check if target is good
-    // Could check ATTR_FUNCTIONAL or ATTR_PG_*
-    return true;
+	uint8_t buf[5];
+	struct pdbg_target *target =  static_cast<struct pdbg_target *>(this->get());
+
+	if (!pdbg_target_get_attribute_packed(target, "ATTR_HWAS_STATE", "41", 1, buf)) {
+		FAPI_ERR ("Can not read ATTR_HWAS_STATE attribute");
+		return false;
+	}
+
+	//isFuntional bit is stored in 4th byte and bit 3 position in HWAS_STATE
+	return (buf[4] & 0x20);
 }
 
 ///
