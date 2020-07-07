@@ -97,7 +97,8 @@ HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_vpd_access.H \
 	$(srcdir)/hwpf/fapi2/include/plat/subroutine_executor.H \
 	$(srcdir)/hwpf/fapi2/include/plat/target.H \
-	$(srcdir)/hwpf/fapi2/include/plat/vpd_access.H
+	$(srcdir)/hwpf/fapi2/include/plat/vpd_access.H \
+	$(srcdir)/hwpf/fapi2/include/plat/plat_target_filter.H
 
 p10_attributes.db: $(ATTRIB_XML) $(srcdir)/scripts/attribute.py
 	$(AM_V_GEN)$(srcdir)/scripts/attribute.py parse $@ $(ATTRIB_XML)
