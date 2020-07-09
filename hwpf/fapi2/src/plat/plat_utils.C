@@ -113,12 +113,12 @@ ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, 
 	if (!tgt) {
 	 	/* TODO: This should never happen but we've only got a partial
 	 	 * implementation of targetting so far */
-	 	printf("NULL target reading attribute not implemented reading %s. Using pdbg_dt_root for the moment.\n", attr);
+		FAPI_INF("NULL target reading attribute not implemented reading %s. Using pdbg_dt_root for the moment.\n", attr);
 		tgt = pdbg_target_root();
 	}
 
 	if (!pdbg_target_set_attribute(tgt, attr, size, count, val)) {
-		fprintf(stderr, "Failed to write attribute %s\n", attr);
+		FAPI_ERR("Failed to write attribute %s\n", attr);
 		return FAPI2_RC_FALSE;
 	}
 
@@ -131,12 +131,12 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 	if (!tgt) {
 	 	/* TODO: This should never happen but we've only got a partial
 	 	 * implementation of targetting so far */
-	 	printf("NULL target reading attribute %s. Using pdbg_dt_root for the moment.\n", attr);
+		FAPI_INF("NULL target reading attribute %s. Using pdbg_dt_root for the moment.\n", attr);
 		tgt = pdbg_target_root();
 	}
 
 	if (!pdbg_target_get_attribute(tgt, attr, size, count, val)) {
-		fprintf(stderr, "Failed to read attribute %s\n", attr);
+		FAPI_ERR("Failed to read attribute %s\n", attr);
 		return FAPI2_RC_FALSE;
 	}
 
