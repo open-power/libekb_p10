@@ -40,11 +40,17 @@ namespace fapi2
 static const uint32_t MAX_ECMD_STRING_LEN = 64;
 };
 
+// Trace location format, LOG_LEVEL: FUNCTION_NAME:LINE_NO
+#define TRACE_LOC_FORMAT_SPEC "%s: %s:%d "
+
+// Making both trace location and caller trace format specifier as
+// single argument to pass into libekb_log
+#define TRACE_FORMAT_SPEC(LOC, _fmt_) LOC _fmt_ "\n"
+
 // Information traces (go into fast trace buffer that can wrap often)
 #define FAPI_TRACE(_level_, _id_, _fmt_, _args_...)                              \
-    libekb_log(_level_, "%s: %s:%d ", _id_, __func__, __LINE__);                 \
-    libekb_log(_level_, _fmt_, ##_args_);                                        \
-    libekb_log(_level_, "\n")
+    libekb_log(_level_, TRACE_FORMAT_SPEC(TRACE_LOC_FORMAT_SPEC, _fmt_),         \
+               _id_, __func__, __LINE__, ##_args_);
 
 #define FAPI_INF(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_INF, "inf", _fmt_, ##_args_)
 
