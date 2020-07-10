@@ -7,3 +7,6 @@ include ekb/chips/p10/procedures/hwp/perv/p10_start_cbs.mk
 
 # istep6-21
 include ekb/chips/p10/procedures/hwp/istep/p10_do_fw_hb_istep.mk
+
+# Procedure to check sbe status.
+include ekb/chips/p10/procedures/hwp/sbe/p10_get_sbe_msg_register.mk
