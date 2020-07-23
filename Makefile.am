@@ -69,7 +69,11 @@ $(ERROR_INFO_HEADER) $(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C: $(ERROR_INFO_XML
 
 #The PLAT HWP Error Parser file generated from Error XML files
 ERROR_PARSER_XML = \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_clock_test_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_scratch_regs_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_do_fw_hb_istep.xml
+
 ERROR_PARSER_HEADER = \
 	$(ERROR_INFO_DIR)/platHwpErrParser.H \
 	$(ERROR_INFO_DIR)/platHwpErrParserFFDC.H
