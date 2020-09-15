@@ -481,6 +481,38 @@ inline bool isTargetPresent(struct pdbg_target *target)
         return (buf[4] & 0x40);
 }
 
+///
+/// @brief Return the entity of given target
+/// @tparam T The type of the target
+/// @param[in] i_target Target<T>
+/// @param[in] i_buffer buffer to write entity path
+/// @return void
+/// @post The contents of the buffer is replaced with the entity path
+/// of the target
+///
+template<TargetType T, MulticastType M, typename V >
+inline void getTgtEntityPath(const Target<T, M, V>& i_target,
+                             std::vector<uint8_t>& i_buffer)
+{
+    // FIXME: If ATTR_PHYS_BIN_PATH size got changed then below buffer size need
+    // to change because, ATTR_PHYS_BIN_PATH is non-fapi attribute and currently
+    // libekb using size based on platform specific attribute_types.xml from pdata.
+    // Note: Size included with NULL.
+    size_t tgt_entitypath_size = 21;
+    uint8_t tgt_entitypath[tgt_entitypath_size] = {0};
+
+    struct pdbg_target* target = static_cast<struct pdbg_target *>(i_target.get());
+    if (!pdbg_target_get_attribute(target, "ATTR_PHYS_BIN_PATH", 1,
+                                   tgt_entitypath_size, tgt_entitypath)) {
+        FAPI_ERR("Could not read ATTR_PHYS_BIN_PATH attribute");
+        return;
+    }
+
+    for (unsigned int i = 0; i < tgt_entitypath_size; ++i)
+    {
+        i_buffer.emplace_back(tgt_entitypath[i]);
+    }
+}
 }
 
 #endif
