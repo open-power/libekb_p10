@@ -143,4 +143,144 @@ ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, 
 	return FAPI2_RC_SUCCESS;
 }
 
+std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
+{
+    // Initialize with "UN_SUPPORTED_PART" to return if unsupported enum
+    // is given
+    std::string hwcalloutstr = "UN_SUPPORTED_PART";
+
+    switch(hwcallout)
+    {
+        case HwCallouts::HwCallout::TOD_CLOCK:
+            hwcalloutstr = "TOD_CLOCK";
+            break;
+        case HwCallouts::HwCallout::MEM_REF_CLOCK:
+            hwcalloutstr = "MEM_REF_CLOCK";
+            break;
+        case HwCallouts::HwCallout::PROC_REF_CLOCK:
+            hwcalloutstr = "PROC_REF_CLOCK";
+            break;
+        case HwCallouts::HwCallout::PCI_REF_CLOCK:
+            hwcalloutstr = "PCI_REF_CLOCK";
+            break;
+        case HwCallouts::HwCallout::FLASH_CONTROLLER_PART:
+            hwcalloutstr = "FLASH_CONTROLLER_PART";
+            break;
+        case HwCallouts::HwCallout::PNOR_PART:
+            hwcalloutstr = "PNOR_PART";
+            break;
+        case HwCallouts::HwCallout::SBE_SEEPROM_PART:
+            hwcalloutstr = "SBE_SEEPROM_PART";
+            break;
+        case HwCallouts::HwCallout::VPD_PART:
+            hwcalloutstr = "VPD_PART";
+            break;
+        case HwCallouts::HwCallout::LPC_SLAVE_PART:
+            hwcalloutstr = "LPC_SLAVE_PART";
+            break;
+        case HwCallouts::HwCallout::GPIO_EXPANDER_PART:
+            hwcalloutstr = "GPIO_EXPANDER_PART";
+            break;
+        case HwCallouts::HwCallout::SPIVID_SLAVE_PART:
+            hwcalloutstr = "SPIVID_SLAVE_PART";
+            break;
+        default:
+            FAPI_ERR("Unsupported HwCalloutEnum[%d] for tostring\n", hwcallout);
+            break;
+    }
+    return hwcalloutstr;
+}
+
+std::string plat_CalloutPriority_tostring(CalloutPriorities::CalloutPriority calloutpriority)
+{
+    // Initialize with "HIGH" to return if unsupported enum is given
+    std::string calloutprioritystr = "HIGH";
+
+    switch(calloutpriority)
+    {
+        case CalloutPriorities::CalloutPriority::LOW:
+            calloutprioritystr = "LOW";
+            break;
+        case CalloutPriorities::CalloutPriority::MEDIUM:
+            calloutprioritystr = "MEDIUM";
+            break;
+        case CalloutPriorities::CalloutPriority::HIGH:
+            calloutprioritystr = "HIGH";
+            break;
+        case CalloutPriorities::CalloutPriority::NONE:
+            calloutprioritystr = "NONE";
+            break;
+        default:
+            FAPI_ERR("Unsupported CalloutPriorityEnum[%d] tostring\n", calloutpriority);
+            break;
+    }
+    return calloutprioritystr;
+}
+
+std::string plat_ProcedureCallout_tostring(ProcedureCallouts::ProcedureCallout procedurecallout)
+{
+    // Initialize with "CODE" to return if unsupported enum is given
+    std::string procedurecalloutstr = "CODE";
+
+    switch(procedurecallout)
+    {
+        case ProcedureCallouts::ProcedureCallout::CODE:
+            procedurecalloutstr = "CODE";
+            break;
+        case ProcedureCallouts::ProcedureCallout::LVL_SUPPORT:
+            procedurecalloutstr = "LVL_SUPPORT";
+            break;
+        case ProcedureCallouts::ProcedureCallout::MEMORY_PLUGGING_ERROR:
+            procedurecalloutstr = "MEMORY_PLUGGING_ERROR";
+            break;
+        case ProcedureCallouts::ProcedureCallout::BUS_CALLOUT:
+            procedurecalloutstr = "BUS_CALLOUT";
+            break;
+        default:
+            FAPI_ERR("Unsupported ProcedureCallout[%d[ for tostring\n", procedurecallout);
+            break;
+    }
+    return procedurecalloutstr;
+}
+
+std::string plat_GardTypeEnum_tostring(GardTypes::GardType gardtype)
+{
+    // Initialize with "GARD_NULL" to return if unsupported enum is given
+    std::string gardtypestr = "GARD_NULL";
+
+    switch(gardtype)
+    {
+        case GardTypes::GardType::GARD_NULL:
+            gardtypestr = "GARD_NULL";
+            break;
+        case GardTypes::GardType::GARD_User_Manual:
+            gardtypestr = "GARD_User_Manual";
+            break;
+        case GardTypes::GardType::GARD_Unrecoverable:
+            gardtypestr = "GARD_Unrecoverable";
+            break;
+        case GardTypes::GardType::GARD_Fatal:
+            gardtypestr = "GARD_Fatal";
+            break;
+        case GardTypes::GardType::GARD_Predictive:
+            gardtypestr = "GARD_Predictive";
+            break;
+        case GardTypes::GardType::GARD_Power:
+            gardtypestr = "GARD_Power";
+            break;
+        case GardTypes::GardType::GARD_PHYP:
+            gardtypestr = "GARD_PHYP";
+            break;
+        case GardTypes::GardType::GARD_Reconfig:
+            gardtypestr = "GARD_Reconfig";
+            break;
+        case GardTypes::GardType::GARD_Void:
+            gardtypestr = "GARD_Void";
+            break;
+        default:
+            FAPI_ERR("Unsupported GardTypeEnum[%d] fro tostring\n", gardtype);
+            break;
+    }
+    return gardtypestr;
+}
 }

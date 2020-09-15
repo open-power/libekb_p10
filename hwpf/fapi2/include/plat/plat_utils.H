@@ -28,6 +28,7 @@
 #include <target.H>
 #include <return_code.H>
 #include <error_info_defs.H>
+#include <plat_types.H>
 
 namespace fapi2
 {
@@ -64,6 +65,13 @@ inline ReturnCode platSpecialWakeup( const Target<T>& i_target, bool i_enable)
 
     return FAPI2_RC_SUCCESS;
 }
+
+std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout);
+std::string plat_CalloutPriority_tostring(
+        CalloutPriorities::CalloutPriority calloutpriority);
+std::string plat_ProcedureCallout_tostring(
+        ProcedureCallouts::ProcedureCallout procedurecallout);
+std::string plat_GardTypeEnum_tostring(GardTypes::GardType gardtype);
 
 }
 
