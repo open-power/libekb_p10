@@ -7,6 +7,7 @@ extern "C" {
 }
 
 #include "plat_trace.H"
+#include "plat_utils.H"
 #include "utils.H"
 
 #include "libekb.H"
@@ -70,33 +71,115 @@ void libekb_log(int loglevel, const char *fmt, ...)
 	va_end(ap);
 }
 
-FFDCData libekb_get_ffdc()
+/*
+ * @brief Used to callout hardware error details.
+ *
+ * The defined api is used collect defined error info in error xml based on
+ * given hwp return code (error code)
+ *
+ * @param rc used to pass hwp return code
+ * @param hwp_errinfo used to pass buffer to fill error details
+ *
+ * @return void
+ */
+static void get_HWPErrorInfo(const fapi2::ReturnCode& rc, HWP_ErrorInfo& hwp_errinfo)
 {
-	fapi2::ReturnCode rc =  fapi2::current_err;
-	FFDCData ffdc;
-	if (rc == fapi2::FAPI2_RC_SUCCESS) {
-		return ffdc;
-	}
+    // Get HWP rc and rc description from auto-generated code i.e error xml
+    fapi2::PELData pelData = fapi2::parseHwpRc(rc);
+    hwp_errinfo.rc = pelData[0].second;
+    hwp_errinfo.rc_desc = pelData[1].second;
 
-	// For PLAT and FAPI error simply return with empty data
-	if (rc.getCreator() == fapi2::ReturnCode::CREATOR_FAPI ||
-		rc.getCreator() == fapi2::ReturnCode::CREATOR_PLAT) {
-		return ffdc;
-	}
+    // Get all available ffdc data (target attribute or some local required
+    // data) which are present in error xml for particular error
+    const fapi2::ErrorInfo* errorInfo = rc.getErrorInfo();
+    for (auto ffdc : errorInfo->iv_ffdcs)
+    {
+        uint32_t ffdcId = ffdc->getFfdcId();
+        uint32_t size;
+        auto errData = ffdc->getData(size);
 
-	fapi2::PELData pelData = fapi2::parseHwpRc(rc);
-	ffdc.insert(ffdc.end(), pelData.begin(), pelData.end());
+        std::vector<std::pair<std::string, std::string>> hwpFFDC;
+        hwpFFDC = fapi2::parseHwpFfdc(ffdcId, errData, size);
 
-	// Iterate through the FFDC sections, adding each to the error log
-	const fapi2::ErrorInfo* errorInfo = rc.getErrorInfo();
-	for (auto error : errorInfo->iv_ffdcs) {
-		uint32_t ffdcId = error->getFfdcId();
-		uint32_t size;
-		auto errData = error->getData(size);
-		FFDCData hwpFFDC = fapi2::parseHwpFfdc(ffdcId, errData, size);
-		ffdc.insert(ffdc.end(), hwpFFDC.begin(), hwpFFDC.end());
-	}
+        hwp_errinfo.ffdcs_data.insert(hwp_errinfo.ffdcs_data.end(),
+                                      hwpFFDC.begin(), hwpFFDC.end());
+    }
 
-	return ffdc;
+    // Get all available hardware callout record details which are present
+    // in error xml for particular error
+    for (auto hwcallout : errorInfo->iv_hwCallouts)
+    {
+        HWCallout hwcallout_data;
+        hwcallout_data.hwid = fapi2::plat_HwCalloutEnum_tostring(hwcallout->iv_hw);
+        hwcallout_data.callout_priority =
+            fapi2::plat_CalloutPriority_tostring(hwcallout->iv_calloutPriority);
+        fapi2::getTgtEntityPath(hwcallout->iv_refTarget,
+                                hwcallout_data.target_entity_path);
+        hwcallout_data.clkPos = hwcallout->iv_clkPos;
+
+        hwp_errinfo.hwcallouts.push_back(hwcallout_data);
+    }
+
+    // Get all available procedures callout record details which are present
+    // in error xml for particular error
+    for (auto proc_callout : errorInfo->iv_procedureCallouts)
+    {
+        ProcedureCallout procedurecallout_data;
+        procedurecallout_data.proc_callout =
+            fapi2::plat_ProcedureCallout_tostring(proc_callout->iv_procedure);
+        procedurecallout_data.callout_priority =
+            fapi2::plat_CalloutPriority_tostring(proc_callout->iv_calloutPriority);
+
+        hwp_errinfo.procedures_callout.push_back(procedurecallout_data);
+    }
+
+    // Get all available CDG (Callout,Deconfigure and Gard) record details
+    // which are present in error xml for particular error
+    for (auto cdg : errorInfo->iv_CDGs)
+    {
+        CDG_Target cdg_tgt_data;
+        fapi2::getTgtEntityPath(cdg->iv_target,
+                                cdg_tgt_data.target_entity_path);
+        cdg_tgt_data.callout = cdg->iv_callout;
+        cdg_tgt_data.callout_priority =
+            fapi2::plat_CalloutPriority_tostring(cdg->iv_calloutPriority);
+        cdg_tgt_data.deconfigure = cdg->iv_deconfigure;
+        cdg_tgt_data.guard = cdg->iv_gard;
+        cdg_tgt_data.guard_type = fapi2::plat_GardTypeEnum_tostring(cdg->iv_gardType);
+
+        hwp_errinfo.cdg_targets.push_back(cdg_tgt_data);
+    }
 }
 
+void libekb_get_ffdc(FFDC& ffdc)
+{
+    // Previous application called HWP return code
+    fapi2::ReturnCode rc =  fapi2::current_err;
+
+    if (rc == fapi2::FAPI2_RC_SUCCESS)
+    {
+        ffdc.ffdc_type = FFDC_TYPE_NONE;
+        ffdc.message = "No FFDC, libekb_get_ffdc() called for success case";
+    }
+    else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_HWP)
+    {
+        ffdc.ffdc_type = FFDC_TYPE_HWP;
+        get_HWPErrorInfo(rc, ffdc.hwp_errorinfo);
+        ffdc.message = "Collected HWP FFDC";
+    }
+    else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_FAPI)
+    {
+        ffdc.ffdc_type = FFDC_TYPE_UNSUPPORTED;
+        ffdc.message = "Un-Supported type to collect FFDC. Error created by FAPI";
+	}
+    else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_PLAT)
+    {
+        ffdc.ffdc_type = FFDC_TYPE_UNSUPPORTED;
+        ffdc.message = "Un-Supported type to collect FFDC. Error created by PLAT";
+    }
+    else
+    {
+        ffdc.ffdc_type = FFDC_TYPE_NONE;
+        ffdc.message = "Unknown error creator. Failed to collect ffdc for error";
+    }
+}
