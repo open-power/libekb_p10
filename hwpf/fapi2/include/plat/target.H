@@ -386,7 +386,32 @@ template<TargetType T, MulticastType M, typename V >
 inline void toString(const Target<T, M, V>& i_target,
                      char* i_buffer, size_t i_bsize)
 {
-    snprintf(i_buffer, i_bsize, "Target 0x%lX/0x%.16lX/0x%X", i_target.get(), T, M);
+    // FIXME: If ATTR_FAPI_NAME size got changed then below buffer size need
+    // to change because, ATTR_FAPI_NAME is non-fapi attribute and currently
+    // libekb using size based on platform specific attribute_types.xml from pdata.
+    // Note: Size included with NULL.
+    size_t fapiname_size = 64;
+    char fapiname[fapiname_size] = {0};
+
+    struct pdbg_target* target = static_cast<struct pdbg_target *>(i_target.get());
+    if (!pdbg_target_get_attribute(target, "ATTR_FAPI_NAME", 1,
+                                   fapiname_size, fapiname)) {
+        FAPI_ERR("Could not read ATTR_FAPI_NAME attribute");
+        snprintf(i_buffer, i_bsize, "Target 0x%lX/0x%.16lX/0x%X", i_target.get(), T, M);
+    }
+    else {
+        if (i_bsize < fapiname_size) {
+            FAPI_INF("Given buffer size[%d] is not enough to hold fapiname[%s] size[%d]",
+                     i_bsize, fapiname, fapiname_size);
+            memcpy(i_buffer, fapiname, i_bsize);
+            if (i_bsize > 0) {
+                i_buffer[i_bsize - 1] = '\0';
+            }
+        }
+        else {
+            memcpy(i_buffer, fapiname, fapiname_size);
+        }
+    }
 }
 
 ///
