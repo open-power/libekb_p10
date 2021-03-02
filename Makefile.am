@@ -72,7 +72,10 @@ ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_clock_test_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_scratch_regs_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_do_fw_hb_istep.xml
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_do_fw_hb_istep.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_common_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_extract_sbe_rc_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_ppe_state_errors.xml
 
 ERROR_PARSER_HEADER = \
 	$(ERROR_INFO_DIR)/platHwpErrParser.H \
