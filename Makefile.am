@@ -63,13 +63,64 @@ $(ERROR_INFO_HEADER) $(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C: $(ERROR_INFO_XML
 
 #The PLAT HWP Error Parser file generated from Error XML files
 ERROR_PARSER_XML = \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_adu_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_block_wakeup_intr_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_clock_test_errors.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_scratch_regs_errors.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_do_fw_hb_istep.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_common_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_extract_sbe_rc_errors.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_ppe_state_errors.xml
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_fbc_core_topo_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_getputsram_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_cache_repair_initf.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_cache_startclocks_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_cache_stopclocks_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_chtm_purge.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_repair_initf.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_shadows_disable.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_shadows_enable.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_startclocks_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_stopclocks_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_vmin_disable.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_core_vmin_enable.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_corecache_clock_control_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_corecache_power_control_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_corecache_realign_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_l2_purge.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_l3_purge.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_ncu_purge.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_powerbus_purge.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_init_done_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_init_start_ppe_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_load_ppe_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_load_iop_xram_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_pba_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_perv_sbe_cmn_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_pm_ocb_indir_access_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_pm_ocb_init_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_ppe_common_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_ppe_state_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_query_mssinfo_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_ram_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_read_write_iop_xram_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_check_quiesce_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_pll_initf_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_pll_setup_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_common_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_core_spr_setup_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_fabricinit_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_i2c_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_load_bootloader_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_lpc_init_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_npll_setup_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_powerdown_backing_caches_error.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_ring_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_scratch_regs_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_select_ex_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_tracearray_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_scomt_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sim_model_boot_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_smp_link_firs_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_thread_control_errors.xml
 
 ERROR_PARSER_HEADER = \
 	$(ERROR_INFO_DIR)/platHwpErrParser.H \
