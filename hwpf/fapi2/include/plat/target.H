@@ -479,18 +479,49 @@ inline Target<TARGET_TYPE_CHIPS> Target<PLAT_TARGET_TYPE_PROC_CHIPLETS>::getPare
 	return Target<TARGET_TYPE_CHIPS>(target);
 }
 
+/// @brief Get an equivalent pdbg class type
+/// Note: Only enabled for Processor type.
+template<TargetType T>
+inline const char* getTargetClass()
+{
+	static_assert((T == TARGET_TYPE_PROC_CHIP),
+                  " Target Type support not available");
+	return "proc";
+}
+
 ///
 /// @brief Get an enumerated target of a specific type
 /// @tparam T The type of the target
-/// @param[in] Ordinal representing the ordinal number of
+/// @param[in] ordinal representing the ordinal number of
 /// the desired target
 /// @return Target<T> the target requested
 ///
 template<TargetType T, MulticastType M, typename V>
-inline Target<T, M, V> getTarget(uint64_t Ordinal)
+inline Target<T, M, V> getTarget(uint64_t ordinal)
 {
-    // For testing
-    return Target<T, M, V>(Ordinal);
+	const char *class_type = getTargetClass<T>();
+	struct pdbg_target *target;
+	uint32_t fapi_position = 0;
+
+	pdbg_for_each_class_target(class_type, target)
+	{
+		if(!pdbg_target_get_attribute(target, "ATTR_FAPI_POS", 4, 1, &fapi_position)) {
+			FAPI_ERR ("Can not read FAPI_POS attribute");
+			assert(false);
+		}
+		if (ordinal == fapi_position)
+		{
+			return Target<T, M, V>(target);
+		}
+	}
+
+        //Error Case No Matching target found.
+	FAPI_ERR("getTarget(): No matching Target Found Class: %s  Ordinal: %.8X ",
+				class_type, ordinal);
+	assert(false);
+
+	//To keep compiler happy.
+	return Target<T, M, V>(target);
 }
 
 inline bool isTargetPresent(struct pdbg_target *target)
