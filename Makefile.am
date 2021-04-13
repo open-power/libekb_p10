@@ -59,7 +59,7 @@ ERROR_INFO_HEADER = \
 
 $(ERROR_INFO_HEADER) $(ERROR_INFO_DIR)/collect_reg_ffdc_regs.C: $(ERROR_INFO_XML)
 	@$(MKDIR_P) $(ERROR_INFO_DIR)
-	$(EKB)/hwpf/fapi2/tools/parseErrorInfo_p10.pl --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
+	$(EKB)/hwpf/fapi2/tools/parseErrorInfo_p10.pl --use-variable-buffers --output-dir=$(ERROR_INFO_DIR) $(ERROR_INFO_XML)
 
 #The PLAT HWP Error Parser file generated from Error XML files
 ERROR_PARSER_XML = \
