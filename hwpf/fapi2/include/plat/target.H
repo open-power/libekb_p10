@@ -31,6 +31,10 @@
 #include <string>
 #include <vector>
 #include <plat_trace.H>
+#include <assert.h>
+#include <array>
+#include <algorithm>
+#include <attribute_ids.H>
 
 namespace fapi2
 {
@@ -522,6 +526,105 @@ inline Target<T, M, V> getTarget(uint64_t ordinal)
 
 	//To keep compiler happy.
 	return Target<T, M, V>(target);
+}
+
+// This structure associates a fapi2 TargetType with a Device tree class
+// type for the purpose of converting back and forth.
+struct fapi2_dt_Class
+{
+	fapi2::TargetType fapi2Type;
+	std::string class_type;
+};
+
+// Declaration of the array holding the associations between fapi2 target
+// types and Device tree class types.
+
+constexpr size_t NUM_FAPI_TARGETING_TYPES = 17;
+
+const std::array<fapi2_dt_Class, NUM_FAPI_TARGETING_TYPES> fapi2ToDtClasses =
+{{
+	{ fapi2::TARGET_TYPE_CORE      , "core"      },
+	{ fapi2::TARGET_TYPE_EQ        , "eq"        },
+	{ fapi2::TARGET_TYPE_FC        , "fc"        },
+	{ fapi2::TARGET_TYPE_IOHS      , "iohs"      },
+	{ fapi2::TARGET_TYPE_MC        , "mc"        },
+	{ fapi2::TARGET_TYPE_MCC       , "mcc"       },
+	{ fapi2::TARGET_TYPE_MI        , "mi"        },
+	{ fapi2::TARGET_TYPE_NMMU      , "nmmu"      },
+	{ fapi2::TARGET_TYPE_OCMB_CHIP , "ocmb"      },
+	{ fapi2::TARGET_TYPE_OMI       , "omi"       },
+	{ fapi2::TARGET_TYPE_OMIC      , "omic"      },
+	{ fapi2::TARGET_TYPE_PAU       , "pau"       },
+	{ fapi2::TARGET_TYPE_PAUC      , "pauc"      },
+	{ fapi2::TARGET_TYPE_PEC       , "pec"       },
+	{ fapi2::TARGET_TYPE_PERV      , "perv"      },
+	{ fapi2::TARGET_TYPE_PHB       , "phb"       },
+	{ fapi2::TARGET_TYPE_PROC_CHIP , "proc"      },
+}};
+
+// @brief Convert fapi2 type to device tree class.
+// @tparam target_type type of the targets value
+//
+// @return device tree class name.
+inline std::string convertFapi2ToDtClass(const fapi2::TargetType target_type)
+{
+	std::string oDtClass = "";
+
+	for(auto iter : fapi2ToDtClasses)
+	{
+		if (iter.fapi2Type == target_type)
+		{
+			oDtClass = iter.class_type;
+			return oDtClass;
+		}
+	}
+
+        //Matching chiplet not found, assert now. No default target can use here.
+	FAPI_ERR("convertFapi2ToDtClasss:: Chiplet type not supported 0x%.16llX!",
+			 target_type);
+	assert(false);
+
+	//To avoid compile warnings
+	return oDtClass;
+}
+
+// @brief Get a target from its Type and instance info
+// @tparam T The type of the target to return
+// @tparam V type of the targets value
+// @param[in] i_type   - Type of target to find
+// @param[in] instance - instance of the target to find
+//
+// @return Target<T>* pointer to a target of type T
+
+// NOTE: Function caller owns the object returned.
+
+template<TargetType T, MulticastType M=MULTICAST_OR,
+typename V=fapi2::plat_target_handle_t>
+inline Target<T, M, V>* getTarget(TargetType i_type, uint8_t instance)
+{
+	std::string class_type = convertFapi2ToDtClass(i_type);
+	Target<T, M, V> * l_target = nullptr;
+	struct pdbg_target *target;
+	uint32_t l_fapiPosition = 0;
+	pdbg_for_each_class_target(class_type.c_str(), target)
+	{
+		if(!pdbg_target_get_attribute(target, "ATTR_FAPI_POS", 4, 1, &l_fapiPosition))
+		{
+			FAPI_ERR ("Can not read FAPI_POS attribute");
+			assert(false);
+		}
+		if (instance == l_fapiPosition)
+		{
+			l_target = new fapi2::Target<T, M, V>(target);
+			return l_target;
+		}
+	}
+	FAPI_ERR("getTarget(): No matching Target Found Type: 0x%x  Instance: 0x%x",
+			i_type, instance);
+	assert(false);
+
+	//to keep compiler happy.
+	return l_target;
 }
 
 inline bool isTargetPresent(struct pdbg_target *target)
