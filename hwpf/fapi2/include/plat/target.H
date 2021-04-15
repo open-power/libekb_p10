@@ -528,6 +528,8 @@ inline Target<T, M, V> getTarget(uint64_t ordinal)
 	return Target<T, M, V>(target);
 }
 
+#ifdef FAPI2_ENABLE_PLATFORM_GET_TARGET
+
 // This structure associates a fapi2 TargetType with a Device tree class
 // type for the purpose of converting back and forth.
 struct fapi2_dt_Class
@@ -626,6 +628,8 @@ inline Target<T, M, V>* getTarget(TargetType i_type, uint8_t instance)
 	//to keep compiler happy.
 	return l_target;
 }
+
+#endif
 
 inline bool isTargetPresent(struct pdbg_target *target)
 {
