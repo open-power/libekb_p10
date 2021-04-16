@@ -151,35 +151,50 @@ static void get_HWPErrorInfo(const fapi2::ReturnCode& rc, HWP_ErrorInfo& hwp_err
     }
 }
 
+
+/*
+ * @brief Helper function to get hwp ffdc information .
+ *
+ * @param ffdc used to pass buffer to fill FFDC data
+ * @param rc fapirc object
+ *
+ * @return void
+ */
+void libekb_get_ffdc_helper(FFDC& ffdc, fapi2::ReturnCode& rc)
+{
+	if (rc == fapi2::FAPI2_RC_SUCCESS)
+   	{
+		ffdc.ffdc_type = FFDC_TYPE_NONE;
+        	ffdc.message = "No FFDC, libekb_get_ffdc() called for success case";
+		return;
+	}
+
+	if (rc.getCreator() == fapi2::ReturnCode::CREATOR_HWP)
+	{
+		ffdc.ffdc_type = FFDC_TYPE_HWP;
+		get_HWPErrorInfo(rc, ffdc.hwp_errorinfo);
+		ffdc.message = "Collected HWP FFDC";
+	}
+	else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_FAPI)
+	{
+		ffdc.ffdc_type = FFDC_TYPE_UNSUPPORTED;
+		ffdc.message = "Un-Supported type to collect FFDC. Error created by FAPI";
+	}
+	else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_PLAT)
+	{
+		ffdc.ffdc_type = FFDC_TYPE_UNSUPPORTED;
+		ffdc.message = "Un-Supported type to collect FFDC. Error created by PLAT";
+	}
+	else
+	{
+		ffdc.ffdc_type = FFDC_TYPE_NONE;
+		ffdc.message = "Unknown error creator. Failed to collect ffdc for error";
+	}
+}
+
 void libekb_get_ffdc(FFDC& ffdc)
 {
-    // Previous application called HWP return code
-    fapi2::ReturnCode rc =  fapi2::current_err;
-
-    if (rc == fapi2::FAPI2_RC_SUCCESS)
-    {
-        ffdc.ffdc_type = FFDC_TYPE_NONE;
-        ffdc.message = "No FFDC, libekb_get_ffdc() called for success case";
-    }
-    else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_HWP)
-    {
-        ffdc.ffdc_type = FFDC_TYPE_HWP;
-        get_HWPErrorInfo(rc, ffdc.hwp_errorinfo);
-        ffdc.message = "Collected HWP FFDC";
-    }
-    else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_FAPI)
-    {
-        ffdc.ffdc_type = FFDC_TYPE_UNSUPPORTED;
-        ffdc.message = "Un-Supported type to collect FFDC. Error created by FAPI";
-	}
-    else if (rc.getCreator() == fapi2::ReturnCode::CREATOR_PLAT)
-    {
-        ffdc.ffdc_type = FFDC_TYPE_UNSUPPORTED;
-        ffdc.message = "Un-Supported type to collect FFDC. Error created by PLAT";
-    }
-    else
-    {
-        ffdc.ffdc_type = FFDC_TYPE_NONE;
-        ffdc.message = "Unknown error creator. Failed to collect ffdc for error";
-    }
+	// Previous application called HWP return code
+	fapi2::ReturnCode rc =  fapi2::current_err;
+	libekb_get_ffdc_helper(ffdc, rc);
 }
