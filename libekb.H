@@ -155,6 +155,22 @@ struct FFDC
 };
 
 /*
+ * @brief SBE FFDC packet
+ */
+typedef struct sbeFfdcPacket{
+    uint32_t fapiRc; // Fapi Rc
+    uint32_t ffdcLengthInWords;  // length of Fapi FFDC data
+    uint32_t *ffdcData; // fapi FFDC data
+    ~sbeFfdcPacket(){
+        // freeup the ffdcData allocated memory
+        if (ffdcData){
+            delete ffdcData;
+        }
+    }
+} sbeFfdcPacketType;
+
+
+/*
  * @brief Used to collect first failure data collection
  *
  * This api is used to collect failure data for libekb failures.
@@ -164,5 +180,21 @@ struct FFDC
  * @retrun void
  */
 void libekb_get_ffdc(FFDC& ffdc);
+
+/*
+ * @brief Used to collect sbe first failure data collection
+ *
+ * This interface reads the SBE FFDC packet, calls appropriate
+ * FAPI functions for further processing, and then adds to the
+ * FFDC buffer input.  Also adds the special callout based on
+ * the fapiRC in the SBE FFDC packet.
+ *
+ * @param ffdc used to pass buffer to fill FFDC data
+ * @param pkt  SBE FFDC packet
+ * @param proc_index failing Processor pdbg index
+ *
+ * @retrun void
+ */
+ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& pkt, int proc_index);
 
 #endif /* __LIBEKB_H__ */

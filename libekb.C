@@ -6,9 +6,13 @@ extern "C" {
 #include <libpdbg.h>
 }
 
+#include <vector>
+
 #include "plat_trace.H"
 #include "plat_utils.H"
 #include "utils.H"
+#include <set_sbe_error.H>
+#include <error_info_defs.H>
 
 #include "libekb.H"
 
@@ -196,5 +200,60 @@ void libekb_get_ffdc(FFDC& ffdc)
 {
 	// Previous application called HWP return code
 	fapi2::ReturnCode rc =  fapi2::current_err;
+	libekb_get_ffdc_helper(ffdc, rc);
+}
+
+void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc_index)
+{
+	using namespace fapi2;
+	fapi2::ReturnCode rc;
+
+	libekb_log(LIBEKB_LOG_INF, "proc index: %d \t fapirc: 0x%x length: %d\n",
+		   proc_index, ffdc_pkt.fapiRc, ffdc_pkt.ffdcLengthInWords);
+
+	if (!ffdc_pkt.ffdcLengthInWords){
+		libekb_log(LIBEKB_LOG_ERR, "Empty sbe ffdc packet, Skipping\n");
+		ffdc.ffdc_type = FFDC_TYPE_NONE;
+		ffdc.message = "Empty sbe ffdc packet. Failed to collect ffdc for error";
+		return;
+	}
+
+	//First Word is the RC itself, skip that and point to FFDC blob
+	sbeFfdc_t* sbe_ffdc =  reinterpret_cast<sbeFfdc_t*>(ffdc_pkt.ffdcData+1);
+
+	//Get size of FFDC data in bytes. exculde RC size.
+	auto size = (ffdc_pkt.ffdcLengthInWords - 1) * sizeof(uint32_t);
+
+	//Create temporary sbeFfdc_t to store the data after endianess conversion.
+	std::vector<sbeFfdc_t> ffdc_endian;
+
+	//get size of sbeFfdc_t structre
+	auto sbe_ffdc_size = sizeof(sbeFfdc_t);
+
+	//endianess conversion.
+	for (auto i = 0; i < size; i += sbe_ffdc_size, sbe_ffdc++)
+	{
+		sbeFfdc_t ffdc_data;
+		ffdc_data.size = ntohl(sbe_ffdc->size);
+		//Special type FFDC size need endianess conversion in data.
+		//TODO: Endianess for size "1, 2, 4" need to revisit.
+		if ((ffdc_data.size == EI_FFDC_SIZE_TARGET) ||
+		    (ffdc_data.size == EI_FFDC_SIZE_BUF) ||
+		    (ffdc_data.size == EI_FFDC_SIZE_VBUF) ||
+		    (ffdc_data.size == EI_FFDC_MAX_SIZE)) {
+
+			ffdc_data.data = be64toh(sbe_ffdc->data);
+		}
+		else {
+			ffdc_data.data = sbe_ffdc->data;
+		}
+                ffdc_endian.push_back(ffdc_data);
+	}
+
+	//Convert SBE Error FFDC to FAPI RC
+	FAPI_SET_SBE_ERROR(rc, ffdc_pkt.fapiRc, ffdc_endian.data(), proc_index);
+	libekb_log(LIBEKB_LOG_INF, " New fapirc: 0x%x\n", rc);
+
+	//update ffdc structre based on new RC
 	libekb_get_ffdc_helper(ffdc, rc);
 }
