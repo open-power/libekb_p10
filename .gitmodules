@@ -1,4 +1,4 @@
 [submodule "ekb"]
 	path = ekb
-	url = ssh://git@github.ibm.com/openbmc/pub-ekb.git
-	branch = master-p10
+	url = https://github.com/open-power/pub-ekb.git
+	branch = main-p10
