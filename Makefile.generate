@@ -17,9 +17,7 @@ SLIST :=
 EKB_HLIST = \
 	$(shell find ekb/hwpf/fapi2/include -name '*.[Hh]' -print) \
 	$(shell find ekb/chips/common -name '*.[Hh]' -print) \
-	$(shell find ekb/chips/p10 -name '*.[Hh]' -print) \
-	$(shell find ekb/generic -name '*.[Hh]' -print) \
-	$(shell find ekb/tools -name '*.[Hh]' -print)
+	$(shell find ekb/chips/p10 -name '*.[Hh]' -print)
 
 define _ADD_MODULE_SRCDIR
 $(eval search_$(1) += $(2))
