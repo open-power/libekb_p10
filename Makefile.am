@@ -228,6 +228,7 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    $(ERROR_PARSER_HEADER)
 
 libekb_la_CXXFLAGS = $(LOCALCXXFLAGS)
+libekb_la_LDFLAGS = -version-info $(SONAME_CURRENT):$(SONAME_REVISION):$(SONAME_AGE)
 
 $(PROCEDURES): $(ATTRIB_HEADER) \
 	       $(ATTRIB_DIR)/platform_attrs.h \

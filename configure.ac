@@ -1,7 +1,11 @@
-AC_INIT([libekb], [1.0])
+AC_INIT([libekb], [1.2])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
+AC_SUBST(SONAME_CURRENT, 1)
+AC_SUBST(SONAME_REVISION, 0)
+AC_SUBST(SONAME_AGE, 0)
+
 
 case "$host" in
 	arm*-*-*) ARCH="arm" ;;
