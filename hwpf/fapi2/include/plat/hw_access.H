@@ -28,13 +28,14 @@
 
 // variable_buffer isn't supported on PPE
 #ifndef __PPE__
-    #include <variable_buffer.H>
+#include <variable_buffer.H>
 #endif
 
-#include <plat_hw_access.H>
 #include <fapi2_hw_access.H>
+#include <plat_hw_access.H>
 
-extern "C" {
+extern "C"
+{
 #include <libpdbg.h>
 }
 
@@ -102,61 +103,61 @@ inline OpModes getOpMode(void)
 /// @param[out] o_data     Buffer that holds data read from HW target.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode getScom(const Target<K, M, V>& i_target,
-                          const uint64_t i_address,
-                          buffer<uint64_t>& o_data)
+                          const uint64_t i_address, buffer<uint64_t>& o_data)
 {
-	struct pdbg_target *target = i_target;
-	uint64_t data;
-	int rc;
+    struct pdbg_target* target = i_target;
+    uint64_t data;
+    int rc;
 
-	rc = pib_read(target, i_address, &data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = pib_read(target, i_address, &data);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	o_data = data;
-	return FAPI2_RC_SUCCESS;
+    o_data = data;
+    return FAPI2_RC_SUCCESS;
 }
 
 /* Returns the pib target for the given proc chip or NULL in case of
  * error. */
-inline struct pdbg_target *get_pib_target(struct pdbg_target *proc)
+inline struct pdbg_target* get_pib_target(struct pdbg_target* proc)
 {
-	struct pdbg_target *pib = NULL;
+    struct pdbg_target* pib = NULL;
 
-	/* We assume each processor chip contains one and only one pib */
-	pdbg_for_each_target("pib", proc, pib) {
-		break;
-	}
+    /* We assume each processor chip contains one and only one pib */
+    pdbg_for_each_target("pib", proc, pib)
+    {
+        break;
+    }
 
-	if (!pib) {
-		FAPI_ERR("No pib target associated with processor %s\n",
-			 pdbg_target_path(proc));
-		return NULL;
-	}
+    if (!pib)
+    {
+        FAPI_ERR("No pib target associated with processor %s\n",
+                 pdbg_target_path(proc));
+        return NULL;
+    }
 
-	return pib;
+    return pib;
 }
 
-template< MulticastType M, typename V >
+template <MulticastType M, typename V>
 inline ReturnCode getScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
-                          const uint64_t i_address,
-                          buffer<uint64_t>& o_data)
+                          const uint64_t i_address, buffer<uint64_t>& o_data)
 {
-	struct pdbg_target *pib, *proc = i_target;
-	uint64_t data;
-	int rc;
+    struct pdbg_target *pib, *proc = i_target;
+    uint64_t data;
+    int rc;
 
-	if (!(pib = get_pib_target(proc)))
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    if (!(pib = get_pib_target(proc)))
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = pib_read(pib, i_address, &data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = pib_read(pib, i_address, &data);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	o_data = data;
-	return FAPI2_RC_SUCCESS;
+    o_data = data;
+    return FAPI2_RC_SUCCESS;
 }
 
 /// @brief Platform-level implementation of putScom()
@@ -165,37 +166,37 @@ inline ReturnCode getScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
 /// @param[in] i_address    SCOM register address to write to.
 /// @param[in] i_data       Buffer that holds data to write into address.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode putScom(const Target<K, M, V>& i_target,
                           const uint64_t i_address,
                           const buffer<uint64_t> i_data)
 {
-	struct pdbg_target *target = i_target;
-	int rc;
+    struct pdbg_target* target = i_target;
+    int rc;
 
-	rc = pib_write(target, i_address, i_data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = pib_write(target, i_address, i_data);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
-template< MulticastType M, typename V >
+template <MulticastType M, typename V>
 inline ReturnCode putScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
                           const uint64_t i_address,
                           const buffer<uint64_t> i_data)
 {
-	struct pdbg_target *pib, *proc = i_target;
-	int rc;
+    struct pdbg_target *pib, *proc = i_target;
+    int rc;
 
-	if (!(pib = get_pib_target(proc)))
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    if (!(pib = get_pib_target(proc)))
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = pib_write(pib, i_address, i_data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = pib_write(pib, i_address, i_data);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
 /// @brief Platform-level implementation of putScomUnderMask()
@@ -205,61 +206,63 @@ inline ReturnCode putScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
 /// @param[in] i_data       Buffer that holds data to write into address.
 /// @param[in] i_mask       Buffer that holds the mask value.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode putScomUnderMask(const Target<K, M, V>& i_target,
                                    const uint64_t i_address,
                                    const buffer<uint64_t> i_data,
                                    const buffer<uint64_t> i_mask)
 {
-	struct pdbg_target *target = i_target;
-	uint64_t data;
-	int rc;
+    struct pdbg_target* target = i_target;
+    uint64_t data;
+    int rc;
 
-	rc = pib_write_mask(target, i_address, i_data, i_mask);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = pib_write_mask(target, i_address, i_data, i_mask);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
-template< MulticastType M, typename V >
-inline ReturnCode putScomUnderMask(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
-                                   const uint64_t i_address,
-                                   const buffer<uint64_t> i_data,
-                                   const buffer<uint64_t> i_mask)
+template <MulticastType M, typename V>
+inline ReturnCode
+    putScomUnderMask(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
+                     const uint64_t i_address, const buffer<uint64_t> i_data,
+                     const buffer<uint64_t> i_mask)
 {
-	struct pdbg_target *pib, *proc = i_target;
-	uint64_t data;
-	int rc;
+    struct pdbg_target *pib, *proc = i_target;
+    uint64_t data;
+    int rc;
 
-	if (!(pib = get_pib_target(proc)))
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    if (!(pib = get_pib_target(proc)))
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = pib_write_mask(pib, i_address, i_data, i_mask);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = pib_write_mask(pib, i_address, i_data, i_mask);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
 /* Returns the pib target for the given proc chip or NULL in case of
  * error. */
-inline struct pdbg_target *get_fsi_target(struct pdbg_target *proc)
+inline struct pdbg_target* get_fsi_target(struct pdbg_target* proc)
 {
-	struct pdbg_target *fsi = NULL;
+    struct pdbg_target* fsi = NULL;
 
-	/* We assume each processor chip contains one and only one pib */
-	pdbg_for_each_target("fsi", proc, fsi) {
-		break;
-	}
+    /* We assume each processor chip contains one and only one pib */
+    pdbg_for_each_target("fsi", proc, fsi)
+    {
+        break;
+    }
 
-	if (!fsi) {
-		FAPI_ERR("No fsi target associated with processor %s\n",
-			 pdbg_target_path(proc));
-		return NULL;
-	}
+    if (!fsi)
+    {
+        FAPI_ERR("No fsi target associated with processor %s\n",
+                 pdbg_target_path(proc));
+        return NULL;
+    }
 
-	return fsi;
+    return fsi;
 }
 
 ///
@@ -271,34 +274,35 @@ inline struct pdbg_target *get_fsi_target(struct pdbg_target *proc)
 /// @param[out] o_data     32-bit buffer that holds data read from HW target.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< MulticastType M, typename V >
-inline ReturnCode getCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
-                                  const uint32_t i_address,
-                                  buffer<uint32_t>& o_data)
+template <MulticastType M, typename V>
+inline ReturnCode
+    getCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
+                    const uint32_t i_address, buffer<uint32_t>& o_data)
 {
-	struct pdbg_target *fsi, *proc = i_target;
-	uint32_t data;
-	int rc;
+    struct pdbg_target *fsi, *proc = i_target;
+    uint32_t data;
+    int rc;
 
-	if (!(fsi = get_fsi_target(proc)))
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    if (!(fsi = get_fsi_target(proc)))
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = fsi_read(fsi, i_address, &data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = fsi_read(fsi, i_address, &data);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	o_data = data;
-	return FAPI2_RC_SUCCESS;
+    o_data = data;
+    return FAPI2_RC_SUCCESS;
 }
 
-template< MulticastType M, typename V >
-inline ReturnCode getCfamRegister(const Target<TARGET_TYPE_MEMBUF_CHIP, M, V>& i_target,
-                                  const uint32_t i_address,
-                                  buffer<uint32_t>& o_data)
+template <MulticastType M, typename V>
+inline ReturnCode
+    getCfamRegister(const Target<TARGET_TYPE_MEMBUF_CHIP, M, V>& i_target,
+                    const uint32_t i_address, buffer<uint32_t>& o_data)
 {
-	FAPI_ERR("CFAM access for memory buffer chips not implemented on this platform\n");
+    FAPI_ERR("CFAM access for memory buffer chips not implemented on this "
+             "platform\n");
 
-	return FAPI2_RC_FALSE;
+    return FAPI2_RC_FALSE;
 }
 
 ///
@@ -310,22 +314,22 @@ inline ReturnCode getCfamRegister(const Target<TARGET_TYPE_MEMBUF_CHIP, M, V>& i
 /// @param[out] i_data     32-bit buffer that holds data to write into address.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< MulticastType M, typename V >
-inline ReturnCode putCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
-                                  const uint32_t i_address,
-                                  const buffer<uint32_t> i_data)
+template <MulticastType M, typename V>
+inline ReturnCode
+    putCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
+                    const uint32_t i_address, const buffer<uint32_t> i_data)
 {
-	struct pdbg_target *fsi, *proc = i_target;
-	int rc;
+    struct pdbg_target *fsi, *proc = i_target;
+    int rc;
 
-	if (!(fsi = get_fsi_target(proc)))
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    if (!(fsi = get_fsi_target(proc)))
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	rc = fsi_write(fsi, i_address, i_data);
-	if (rc)
-		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+    rc = fsi_write(fsi, i_address, i_data);
+    if (rc)
+        return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
 /// @brief Platform-level implementation  of putRing()
@@ -335,9 +339,8 @@ inline ReturnCode putCfamRegister(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_t
 /// @param[in] i_ringID   Ring ID that will identify the Ring in the image.
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, MulticastType M, typename V >
-ReturnCode putRing(const Target<K, M, V>& i_target,
-                   const RingId_t i_ringID,
+template <TargetType K, MulticastType M, typename V>
+ReturnCode putRing(const Target<K, M, V>& i_target, const RingId_t i_ringID,
                    const RingMode i_ringMode)
 {
     return FAPI2_RC_SUCCESS;
@@ -355,10 +358,9 @@ ReturnCode putRing(const Target<K, M, V>& i_target,
 /// @param[in]  i_ringMode Ring operation mode.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode getRing(const Target<K, M, V>& i_target,
-                          const scanRingId_t i_address,
-                          variable_buffer& o_data,
+                          const scanRingId_t i_address, variable_buffer& o_data,
                           const RingMode i_ringMode)
 {
     return FAPI2_RC_SUCCESS;
@@ -373,12 +375,11 @@ inline ReturnCode getRing(const Target<K, M, V>& i_target,
 /// @param[in] i_modifyMode The modify mode (or/and/xor)
 /// @param[in] i_ringMode   Ring operation mode.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode modifyRing(const Target<K, M, V>& i_target,
-                             const scanRingId_t i_address,
-                             const variable_buffer& i_data,
-                             const ChipOpModifyMode i_modifyMode,
-                             const RingMode i_ringMode)
+template <TargetType K, MulticastType M, typename V>
+inline ReturnCode
+    modifyRing(const Target<K, M, V>& i_target, const scanRingId_t i_address,
+               const variable_buffer& i_data,
+               const ChipOpModifyMode i_modifyMode, const RingMode i_ringMode)
 {
     return FAPI2_RC_SUCCESS;
 }
@@ -431,40 +432,34 @@ inline ReturnCode modifyRing(const Target<K, M, V>& i_target,
 ///       the quotes for the cronus environment
 ///
 #ifdef FAPI_SUPPORT_SPY_AS_ENUM
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode getSpy(const Target<K, M, V>& i_target,
-                         const spyId_t i_spyId,
+template <TargetType K, MulticastType M, typename V>
+inline ReturnCode getSpy(const Target<K, M, V>& i_target, const spyId_t i_spyId,
                          variable_buffer& o_data)
 {
     static_assert(K == 0, "implement getSpy (enum)");
     return ~FAPI2_RC_SUCCESS;
 }
 
-template< TargetType K >
-inline ReturnCode getSpy(const Target<K>& i_target,
-                         const spyId_t i_spyId,
-                         variable_buffer& o_data,
-                         const RingMode i_ringMode)
+template <TargetType K>
+inline ReturnCode getSpy(const Target<K>& i_target, const spyId_t i_spyId,
+                         variable_buffer& o_data, const RingMode i_ringMode)
 {
     static_assert(K == 0, "implement getSpy (enum)");
     return ~FAPI2_RC_SUCCESS;
 }
 #endif
 #ifdef FAPI_SUPPORT_SPY_AS_STRING
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode getSpy(const Target<K, M, V>& i_target,
-                         const char* const i_spyId,
-                         variable_buffer& o_data)
+                         const char* const i_spyId, variable_buffer& o_data)
 {
     static_assert(K == 0, "implement getSpy (string)");
     return ~FAPI2_RC_SUCCESS;
 }
 
-template< TargetType K >
-inline ReturnCode getSpy(const Target<K>& i_target,
-                         const char* const i_spyId,
-                         variable_buffer& o_data,
-                         const RingMode i_ringMode)
+template <TargetType K>
+inline ReturnCode getSpy(const Target<K>& i_target, const char* const i_spyId,
+                         variable_buffer& o_data, const RingMode i_ringMode)
 {
     static_assert(K == 0, "implement getSpy (string)");
     return ~FAPI2_RC_SUCCESS;
@@ -510,9 +505,8 @@ inline ReturnCode getSpy(const Target<K>& i_target,
 ///         the quotes for the cronus environment
 ///
 #ifdef FAPI_SUPPORT_SPY_AS_ENUM
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode putSpy(const Target<K, M, V>& i_target,
-                         const spyId_t i_spyId,
+template <TargetType K, MulticastType M, typename V>
+inline ReturnCode putSpy(const Target<K, M, V>& i_target, const spyId_t i_spyId,
                          const variable_buffer& i_data)
 {
     static_assert(K == 0, "implement putSpy (enum)");
@@ -520,7 +514,7 @@ inline ReturnCode putSpy(const Target<K, M, V>& i_target,
 }
 #endif
 #ifdef FAPI_SUPPORT_SPY_AS_STRING
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode putSpy(const Target<K, M, V>& i_target,
                          const char* const i_spyId,
                          const variable_buffer& i_data)
@@ -529,10 +523,9 @@ inline ReturnCode putSpy(const Target<K, M, V>& i_target,
     return ~FAPI2_RC_SUCCESS;
 }
 
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode putSpy(const Target<K, M, V>& i_target,
-                         const char* const i_spyId,
-                         const char* i_enum)
+                         const char* const i_spyId, const char* i_enum)
 {
     static_assert(K == 0, "implement putSpy (string)");
     return ~FAPI2_RC_SUCCESS;
@@ -559,22 +552,20 @@ inline ReturnCode putSpy(const Target<K, M, V>& i_target,
 ///         See fapiPutSpy for details on spy id specifics.
 ///
 #ifdef FAPI_SUPPORT_SPY_AS_ENUM
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode putSpyImage(const Target<K, M, V>& i_target,
-                              const spyId_t i_spyId,
-                              const variable_buffer& i_data,
-                              variable_buffer& o_imageData)
+template <TargetType K, MulticastType M, typename V>
+inline ReturnCode
+    putSpyImage(const Target<K, M, V>& i_target, const spyId_t i_spyId,
+                const variable_buffer& i_data, variable_buffer& o_imageData)
 {
     static_assert(K == 0, "implement putSpyImage (enum)");
     return ~FAPI2_RC_SUCCESS;
 }
 #endif
 #ifdef FAPI_SUPPORT_SPY_AS_STRING
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode putSpyImage(const Target<K, M, V>& i_target,
-                              const char* const i_spyId,
-                              const variable_buffer& i_data,
-                              variable_buffer& o_imageData)
+template <TargetType K, MulticastType M, typename V>
+inline ReturnCode
+    putSpyImage(const Target<K, M, V>& i_target, const char* const i_spyId,
+                const variable_buffer& i_data, variable_buffer& o_imageData)
 {
     static_assert(K == 0, "implement putSpyImage (string)");
     return ~FAPI2_RC_SUCCESS;
@@ -598,10 +589,9 @@ inline ReturnCode putSpyImage(const Target<K, M, V>& i_target,
 ///         See fapiPutSpy for details on spy id specifics.
 ///
 #ifdef FAPI_SUPPORT_SPY_AS_ENUM
-template< TargetType K, MulticastType M, typename V >
+template <TargetType K, MulticastType M, typename V>
 inline ReturnCode getSpyImage(const Target<K, M, V>& i_target,
-                              const spyId_t i_spyId,
-                              variable_buffer& o_data,
+                              const spyId_t i_spyId, variable_buffer& o_data,
                               const variable_buffer& i_imageData)
 {
     static_assert(K == 0, "implement getSpyImage (enum)");
@@ -609,11 +599,10 @@ inline ReturnCode getSpyImage(const Target<K, M, V>& i_target,
 }
 #endif
 #ifdef FAPI_SUPPORT_SPY_AS_STRING
-template< TargetType K, MulticastType M, typename V >
-inline ReturnCode getSpyImage(const Target<K, M, V>& i_target,
-                              const char* const i_spyId,
-                              variable_buffer& o_data,
-                              const variable_buffer& i_imageData)
+template <TargetType K, MulticastType M, typename V>
+inline ReturnCode
+    getSpyImage(const Target<K, M, V>& i_target, const char* const i_spyId,
+                variable_buffer& o_data, const variable_buffer& i_imageData)
 {
     static_assert(K == 0, "implement getSpyImage (string)");
     return ~FAPI2_RC_SUCCESS;
@@ -622,6 +611,6 @@ inline ReturnCode getSpyImage(const Target<K, M, V>& i_target,
 
 #endif // PPE
 
-};
+}; // namespace fapi2
 
 #endif // _FAPI2_HWACCESS_H_

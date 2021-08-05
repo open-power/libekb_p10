@@ -25,30 +25,32 @@
 #ifndef __VPDACCESS_H_
 #define __VPDACCESS_H_
 
-#include <target.H>
-#include <return_code.H>
-#include <plat_vpd_access.H>
 #include <fapi2_vpd_access.H>
+#include <plat_vpd_access.H>
+#include <return_code.H>
+#include <target.H>
 namespace fapi2
 {
 // -- platform specializations for getVPD go here --
 
 // specialization for MCS target
-template<> fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                    VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
-                                    uint8_t* o_blob)
+template <>
+fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                         VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
+                         uint8_t* o_blob)
 {
-    return platGetVPD( i_target, io_vpd_info, o_blob );
+    return platGetVPD(i_target, io_vpd_info, o_blob);
 }
 
 // specialization for OCMB target
-template<> fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                    VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpd_info,
-                                    uint8_t* o_blob)
+template <>
+fapi2::ReturnCode
+    getVPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+           VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpd_info, uint8_t* o_blob)
 {
-    return platGetVPD( i_target, io_vpd_info, o_blob );
+    return platGetVPD(i_target, io_vpd_info, o_blob);
 }
 
-};
+}; // namespace fapi2
 
 #endif // _FAPI2_VPDACCESS_H_

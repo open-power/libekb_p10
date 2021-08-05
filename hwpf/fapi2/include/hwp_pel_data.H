@@ -1,4 +1,4 @@
-//IBM_PROLOG_BEGIN_TAG
+// IBM_PROLOG_BEGIN_TAG
 /*
  * Copyright 2017 IBM International Business Machines Corp.
  *
@@ -15,14 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//IBM_PROLOG_END_TAG
+// IBM_PROLOG_END_TAG
 #pragma once
 
 #include <algorithm>
 #include <iomanip>
-#include <vector>
 #include <sstream>
 #include <utility>
+#include <vector>
 namespace fapi2
 {
 
@@ -32,7 +32,7 @@ using PELData = std::vector<std::pair<std::string, std::string>>;
  *
  * @brief Capture failure data from HWP for PEL creation
 
- * This class captures the failure data returned from the 
+ * This class captures the failure data returned from the
  * hardware procedure to key, value format so that
  * it can be used in the creation of PEL.
  */

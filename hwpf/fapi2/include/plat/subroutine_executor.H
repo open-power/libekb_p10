@@ -31,7 +31,6 @@
 #define SUBROUTINEEXECUTOR_H_
 
 #include <fapi2_subroutine_executor.H>
-
 #include <plat_trace.H>
 
 /**
@@ -41,10 +40,10 @@
  * This macro calls a PLAT macro which will do any platform specific work to
  * execute the Subroutine (e.g. dlopening a shared library)
  */
-#define FAPI_PLAT_CALL_SUBROUTINE(RC, FUNC, _args...) \
-    { \
-        FAPI_DBG("executing FAPI_PLAT_CALL_SUBROUTINE macro"); \
-        RC = FUNC(_args); \
+#define FAPI_PLAT_CALL_SUBROUTINE(RC, FUNC, _args...)                          \
+    {                                                                          \
+        FAPI_DBG("executing FAPI_PLAT_CALL_SUBROUTINE macro");                 \
+        RC = FUNC(_args);                                                      \
     }
 
 #endif

@@ -27,15 +27,14 @@
 namespace fapi2
 {
 
-fapi2::ReturnCode getSPD( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                          uint8_t* o_blob,
-                          size_t& s )
+fapi2::ReturnCode getSPD(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                         uint8_t* o_blob, size_t& s)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     return l_rc;
 }
 
-};
+}; // namespace fapi2
 
 #endif

@@ -1,27 +1,29 @@
 #ifndef __LIBEKB_H__
 #define __LIBEKB_H__
 
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 
-#define LIBEKB_LOG_ERR   0
-#define LIBEKB_LOG_INF   1
-#define LIBEKB_LOG_IMP   2
-#define LIBEKB_LOG_MFG   3
-#define LIBEKB_LOG_SCAN  4
-#define LIBEKB_LOG_DBG   5
+#define LIBEKB_LOG_ERR 0
+#define LIBEKB_LOG_INF 1
+#define LIBEKB_LOG_IMP 2
+#define LIBEKB_LOG_MFG 3
+#define LIBEKB_LOG_SCAN 4
+#define LIBEKB_LOG_DBG 5
 
-extern "C" {
+extern "C"
+{
 #include <stdarg.h>
 
-typedef void (*libekb_log_func_t)(void *private_data, const char *fmt, va_list ap);
+    typedef void (*libekb_log_func_t)(void* private_data, const char* fmt,
+                                      va_list ap);
 
-int libekb_init(void);
+    int libekb_init(void);
 
-void libekb_set_logfunc(libekb_log_func_t fn, void *private_data);
-void libekb_set_loglevel(int loglevel);
-void libekb_log(int loglevel, const char *fmt, ...);
+    void libekb_set_logfunc(libekb_log_func_t fn, void* private_data);
+    void libekb_set_loglevel(int loglevel);
+    void libekb_log(int loglevel, const char* fmt, ...);
 }
 
 /*
@@ -129,13 +131,13 @@ struct HWP_ErrorInfo
 enum FFDC_TYPE
 {
     // No ffdc
-    FFDC_TYPE_NONE            = 0,
+    FFDC_TYPE_NONE = 0,
 
     // Unsupported ffdc by libekb
-    FFDC_TYPE_UNSUPPORTED     = 1,
+    FFDC_TYPE_UNSUPPORTED = 1,
 
     // FFDC is created for hardware procedure failures
-    FFDC_TYPE_HWP             = 2
+    FFDC_TYPE_HWP = 2
 };
 
 /*
@@ -157,18 +159,20 @@ struct FFDC
 /*
  * @brief SBE FFDC packet
  */
-typedef struct sbeFfdcPacket{
-    uint32_t fapiRc; // Fapi Rc
-    uint32_t ffdcLengthInWords;  // length of Fapi FFDC data
-    uint32_t *ffdcData; // fapi FFDC data
-    ~sbeFfdcPacket(){
+typedef struct sbeFfdcPacket
+{
+    uint32_t fapiRc;            // Fapi Rc
+    uint32_t ffdcLengthInWords; // length of Fapi FFDC data
+    uint32_t* ffdcData;         // fapi FFDC data
+    ~sbeFfdcPacket()
+    {
         // freeup the ffdcData allocated memory
-        if (ffdcData){
+        if (ffdcData)
+        {
             delete ffdcData;
         }
     }
 } sbeFfdcPacketType;
-
 
 /*
  * @brief Used to collect first failure data collection
@@ -195,6 +199,7 @@ void libekb_get_ffdc(FFDC& ffdc);
  *
  * @retrun void
  */
- void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& pkt, int proc_index);
+void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& pkt,
+                         int proc_index);
 
 #endif /* __LIBEKB_H__ */

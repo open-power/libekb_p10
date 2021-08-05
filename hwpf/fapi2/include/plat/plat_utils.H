@@ -24,11 +24,11 @@
 #ifndef __FAPI2_PLAT_UTILS__
 #define __FAPI2_PLAT_UTILS__
 
-#include <stdint.h>
-#include <target.H>
-#include <return_code.H>
 #include <error_info_defs.H>
 #include <plat_types.H>
+#include <return_code.H>
+#include <stdint.h>
+#include <target.H>
 
 namespace fapi2
 {
@@ -36,25 +36,25 @@ namespace fapi2
 // Platforms are expected to define this
 static const PlatformType PLATFORM = PLAT_EXAMPLE;
 
-template<TargetType T>
-inline ReturnCode platSpecialWakeup( const Target<T>& i_target, bool i_enable)
+template <TargetType T>
+inline ReturnCode platSpecialWakeup(const Target<T>& i_target, bool i_enable)
 {
     static_cast<void>(i_enable);
     static_cast<void>(i_target);
 
-    if(is_same<T, TARGET_TYPE_PROC_CHIP>() )
+    if (is_same<T, TARGET_TYPE_PROC_CHIP>())
     {
         FAPI_INF("do proc special wakeup stuff");
     }
-    else if(is_same<T, TARGET_TYPE_CORE>() )
+    else if (is_same<T, TARGET_TYPE_CORE>())
     {
         FAPI_INF("do core special wakeup stuff");
     }
-    else if(is_same<T, TARGET_TYPE_EX>() )
+    else if (is_same<T, TARGET_TYPE_EX>())
     {
         FAPI_INF("do ex speical wakeup stuff");
     }
-    else if(is_same<T, TARGET_TYPE_EQ>() )
+    else if (is_same<T, TARGET_TYPE_EQ>())
     {
         FAPI_INF("do eq special wakeup stuff");
     }
@@ -68,13 +68,13 @@ inline ReturnCode platSpecialWakeup( const Target<T>& i_target, bool i_enable)
 
 std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout);
 std::string plat_CalloutPriority_tostring(
-        CalloutPriorities::CalloutPriority calloutpriority);
+    CalloutPriorities::CalloutPriority calloutpriority);
 std::string plat_ProcedureCallout_tostring(
-        ProcedureCallouts::ProcedureCallout procedurecallout);
+    ProcedureCallouts::ProcedureCallout procedurecallout);
 std::string plat_GardTypeEnum_tostring(GardTypes::GardType gardtype);
 
-}
+} // namespace fapi2
 
-void plat_set_fdt(void *fdt);
+void plat_set_fdt(void* fdt);
 
 #endif

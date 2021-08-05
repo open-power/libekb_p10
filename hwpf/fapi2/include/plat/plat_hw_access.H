@@ -26,8 +26,6 @@
 #define _FAPI2_PLAT_HWACCESS_H_
 
 namespace fapi2
-{
-
-}
+{}
 
 #endif // _FAPI2_PLAT_HWACCESS_H_

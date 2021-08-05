@@ -21,17 +21,18 @@
  *  @brief Implements fapi2 common utilities
  */
 
-#include <target.H>
-#include <stdint.h>
+#include <assert.h>
+#include <errno.h>
+#include <error_info.H>
 #include <plat_trace.H>
 #include <return_code.H>
-#include <error_info.H>
-#include <utils.H>
-#include <assert.h>
+#include <stdint.h>
+#include <target.H>
 #include <time.h>
-#include <errno.h>
+#include <utils.H>
 
-extern "C" {
+extern "C"
+{
 #include <libpdbg.h>
 }
 
@@ -40,34 +41,28 @@ namespace fapi2
 ///
 /// @brief Log an error.
 ///
-void logError(
-    fapi2::ReturnCode& io_rc,
-    fapi2::errlSeverity_t i_sev,
-    bool i_unitTestError)
-{
-}
+void logError(fapi2::ReturnCode& io_rc, fapi2::errlSeverity_t i_sev,
+              bool i_unitTestError)
+{}
 
 // will do the same as log error here in fapi2 plat implementation
-void createPlatLog(
-    fapi2::ReturnCode& io_rc,
-    fapi2::errlSeverity_t i_sev)
+void createPlatLog(fapi2::ReturnCode& io_rc, fapi2::errlSeverity_t i_sev)
 {
-    FAPI_DBG("Called createError()" );
+    FAPI_DBG("Called createError()");
     logError(io_rc, i_sev, false);
 }
 
 ///
 /// @brief Associate an error to PRD PLID.
 ///
-void log_related_error(
-    const Target<TARGET_TYPE_ALL>& i_target,
-    fapi2::ReturnCode& io_rc,
-    const fapi2::errlSeverity_t i_sev,
-    const bool i_unitTestError )
+void log_related_error(const Target<TARGET_TYPE_ALL>& i_target,
+                       fapi2::ReturnCode& io_rc,
+                       const fapi2::errlSeverity_t i_sev,
+                       const bool i_unitTestError)
 {
-    FAPI_DBG("Called log_related_error()" );
+    FAPI_DBG("Called log_related_error()");
     // Just commit the log in default implementation
-    logError( io_rc, i_sev, i_unitTestError );
+    logError(io_rc, i_sev, i_unitTestError);
 } // end log_related_error
 
 ///
@@ -85,12 +80,13 @@ ReturnCode delay(uint64_t i_nanoSeconds, uint64_t i_simCycles, bool i_fixed)
     delay.tv_sec = i_nanoSeconds / 1000000000;
     delay.tv_nsec = i_nanoSeconds % 1000000000;
 
-    do {
-	    rc = nanosleep(&delay, &delay);
+    do
+    {
+        rc = nanosleep(&delay, &delay);
     } while (rc == -1 && errno == EINTR);
 
     if (rc)
-	    return FAPI2_RC_FALSE;
+        return FAPI2_RC_FALSE;
 
     return FAPI2_RC_SUCCESS;
 }
@@ -107,40 +103,50 @@ void Assert(bool i_expression)
 
 thread_local ReturnCode current_err;
 
-ReturnCode plat_access_attr_SETMACRO(const char *attr, struct pdbg_target *tgt, uint32_t size, uint32_t count, void *val)
+ReturnCode plat_access_attr_SETMACRO(const char* attr, struct pdbg_target* tgt,
+                                     uint32_t size, uint32_t count, void* val)
 {
-	/* NULL targets use pdbg_dt_root */
-	if (!tgt) {
-	 	/* TODO: This should never happen but we've only got a partial
-	 	 * implementation of targetting so far */
-		FAPI_INF("NULL target reading attribute not implemented reading %s. Using pdbg_dt_root for the moment.\n", attr);
-		tgt = pdbg_target_root();
-	}
+    /* NULL targets use pdbg_dt_root */
+    if (!tgt)
+    {
+        /* TODO: This should never happen but we've only got a partial
+         * implementation of targetting so far */
+        FAPI_INF("NULL target reading attribute not implemented reading %s. "
+                 "Using pdbg_dt_root for the moment.\n",
+                 attr);
+        tgt = pdbg_target_root();
+    }
 
-	if (!pdbg_target_set_attribute(tgt, attr, size, count, val)) {
-		FAPI_ERR("Failed to write attribute %s\n", attr);
-		return FAPI2_RC_FALSE;
-	}
+    if (!pdbg_target_set_attribute(tgt, attr, size, count, val))
+    {
+        FAPI_ERR("Failed to write attribute %s\n", attr);
+        return FAPI2_RC_FALSE;
+    }
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
-ReturnCode plat_access_attr_GETMACRO(const char *attr, struct pdbg_target *tgt, uint32_t size, uint32_t count, void *val)
+ReturnCode plat_access_attr_GETMACRO(const char* attr, struct pdbg_target* tgt,
+                                     uint32_t size, uint32_t count, void* val)
 {
-	/* NULL targets use pdbg_dt_root */
-	if (!tgt) {
-	 	/* TODO: This should never happen but we've only got a partial
-	 	 * implementation of targetting so far */
-		FAPI_INF("NULL target reading attribute %s. Using pdbg_dt_root for the moment.\n", attr);
-		tgt = pdbg_target_root();
-	}
+    /* NULL targets use pdbg_dt_root */
+    if (!tgt)
+    {
+        /* TODO: This should never happen but we've only got a partial
+         * implementation of targetting so far */
+        FAPI_INF("NULL target reading attribute %s. Using pdbg_dt_root for the "
+                 "moment.\n",
+                 attr);
+        tgt = pdbg_target_root();
+    }
 
-	if (!pdbg_target_get_attribute(tgt, attr, size, count, val)) {
-		FAPI_ERR("Failed to read attribute %s\n", attr);
-		return FAPI2_RC_FALSE;
-	}
+    if (!pdbg_target_get_attribute(tgt, attr, size, count, val))
+    {
+        FAPI_ERR("Failed to read attribute %s\n", attr);
+        return FAPI2_RC_FALSE;
+    }
 
-	return FAPI2_RC_SUCCESS;
+    return FAPI2_RC_SUCCESS;
 }
 
 std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
@@ -149,7 +155,7 @@ std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
     // is given
     std::string hwcalloutstr = "UN_SUPPORTED_PART";
 
-    switch(hwcallout)
+    switch (hwcallout)
     {
         case HwCallouts::HwCallout::TOD_CLOCK:
             hwcalloutstr = "TOD_CLOCK";
@@ -191,12 +197,13 @@ std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
     return hwcalloutstr;
 }
 
-std::string plat_CalloutPriority_tostring(CalloutPriorities::CalloutPriority calloutpriority)
+std::string plat_CalloutPriority_tostring(
+    CalloutPriorities::CalloutPriority calloutpriority)
 {
     // Initialize with "HIGH" to return if unsupported enum is given
     std::string calloutprioritystr = "HIGH";
 
-    switch(calloutpriority)
+    switch (calloutpriority)
     {
         case CalloutPriorities::CalloutPriority::LOW:
             calloutprioritystr = "LOW";
@@ -211,18 +218,20 @@ std::string plat_CalloutPriority_tostring(CalloutPriorities::CalloutPriority cal
             calloutprioritystr = "NONE";
             break;
         default:
-            FAPI_ERR("Unsupported CalloutPriorityEnum[%d] tostring\n", calloutpriority);
+            FAPI_ERR("Unsupported CalloutPriorityEnum[%d] tostring\n",
+                     calloutpriority);
             break;
     }
     return calloutprioritystr;
 }
 
-std::string plat_ProcedureCallout_tostring(ProcedureCallouts::ProcedureCallout procedurecallout)
+std::string plat_ProcedureCallout_tostring(
+    ProcedureCallouts::ProcedureCallout procedurecallout)
 {
     // Initialize with "CODE" to return if unsupported enum is given
     std::string procedurecalloutstr = "CODE";
 
-    switch(procedurecallout)
+    switch (procedurecallout)
     {
         case ProcedureCallouts::ProcedureCallout::CODE:
             procedurecalloutstr = "CODE";
@@ -237,7 +246,8 @@ std::string plat_ProcedureCallout_tostring(ProcedureCallouts::ProcedureCallout p
             procedurecalloutstr = "BUS_CALLOUT";
             break;
         default:
-            FAPI_ERR("Unsupported ProcedureCallout[%d[ for tostring\n", procedurecallout);
+            FAPI_ERR("Unsupported ProcedureCallout[%d[ for tostring\n",
+                     procedurecallout);
             break;
     }
     return procedurecalloutstr;
@@ -248,7 +258,7 @@ std::string plat_GardTypeEnum_tostring(GardTypes::GardType gardtype)
     // Initialize with "GARD_NULL" to return if unsupported enum is given
     std::string gardtypestr = "GARD_NULL";
 
-    switch(gardtype)
+    switch (gardtype)
     {
         case GardTypes::GardType::GARD_NULL:
             gardtypestr = "GARD_NULL";
@@ -283,4 +293,4 @@ std::string plat_GardTypeEnum_tostring(GardTypes::GardType gardtype)
     }
     return gardtypestr;
 }
-}
+} // namespace fapi2

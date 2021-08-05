@@ -31,13 +31,13 @@ namespace fapi2
 // -- platform specific getVPD implementation goes here --
 
 // platform specific for MCS target -- test code only
-inline fapi2::ReturnCode platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                    VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
-                                    uint8_t* o_blob)
+inline fapi2::ReturnCode
+    platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+               VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info, uint8_t* o_blob)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    if( o_blob == nullptr )
+    if (o_blob == nullptr)
     {
         io_vpd_info.iv_size = 2048;
     }
@@ -50,13 +50,14 @@ inline fapi2::ReturnCode platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
 }
 
 // platform specific for OCMB target -- test code only
-inline fapi2::ReturnCode platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                    VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpd_info,
-                                    uint8_t* o_blob)
+inline fapi2::ReturnCode
+    platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+               VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpd_info,
+               uint8_t* o_blob)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    if( o_blob == nullptr )
+    if (o_blob == nullptr)
     {
         io_vpd_info.iv_size = 128;
     }
@@ -72,11 +73,11 @@ inline fapi2::ReturnCode platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         // Update output variables with the metadata that
         //   should be used to decode the block
 
-        if( io_vpd_info.iv_omi_freq_mhz == 25600 )
+        if (io_vpd_info.iv_omi_freq_mhz == 25600)
         {
             o_blob[0] = 0x40;
         }
-        else if( io_vpd_info.iv_omi_freq_mhz == 21330 )
+        else if (io_vpd_info.iv_omi_freq_mhz == 21330)
         {
             o_blob[0] = 0x10;
         }
@@ -85,11 +86,10 @@ inline fapi2::ReturnCode platGetVPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         io_vpd_info.iv_dmb_mfg_id = 0x2980;
         io_vpd_info.iv_dmb_revision = 0x00;
         io_vpd_info.iv_ddr_mode = 0x0C;
-
     }
 
     return l_rc;
 }
 
-};
+};     // namespace fapi2
 #endif // _FAPI2_PLAT_VPDACCESS_H_

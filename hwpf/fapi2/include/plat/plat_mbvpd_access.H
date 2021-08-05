@@ -29,28 +29,28 @@
 namespace fapi2
 {
 
-inline fapi2::ReturnCode getMBvpdField(const fapi2::MBvpdRecord i_record,
-                                       const fapi2::MBvpdKeyword i_keyword,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
-                                       uint8_t* const i_pBuffer,
-                                       size_t& io_fieldSize)
+inline fapi2::ReturnCode
+    getMBvpdField(const fapi2::MBvpdRecord i_record,
+                  const fapi2::MBvpdKeyword i_keyword,
+                  const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                  uint8_t* const i_pBuffer, size_t& io_fieldSize)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     return l_rc;
 }
 
-inline fapi2::ReturnCode setMBvpdField(const fapi2::MBvpdRecord i_record,
-                                       const fapi2::MBvpdKeyword i_keyword,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
-                                       const uint8_t* const i_pBuffer,
-                                       const size_t i_fieldSize)
+inline fapi2::ReturnCode
+    setMBvpdField(const fapi2::MBvpdRecord i_record,
+                  const fapi2::MBvpdKeyword i_keyword,
+                  const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                  const uint8_t* const i_pBuffer, const size_t i_fieldSize)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     return l_rc;
 }
 
-};
+}; // namespace fapi2
 
 #endif
