@@ -102,7 +102,7 @@ ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_query_mssinfo_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_ram_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_read_write_iop_xram_errors.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_check_quiesce_errors.xml \
+        $(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_check_quiesce_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_pll_initf_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_pll_setup_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_common_errors.xml \
