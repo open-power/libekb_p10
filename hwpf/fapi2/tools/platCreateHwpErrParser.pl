@@ -205,9 +205,9 @@ foreach my $argnum (0 .. $#ARGV)
             my $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
 
             print TGFILE "        case 0x$ffdcHash32Bit:\n";
-            print TGFILE "            uint64_t address =\n";
+            print TGFILE "            {uint64_t address =\n";
             print TGFILE "            be64toh(*(reinterpret_cast<const uint64_t*>(buf)));\n";
-            print TGFILE "            pelData.append(\"Failed SCOM address\", address);\n";
+            print TGFILE "            pelData.append(\"Failed SCOM address\", address);}\n";
             print TGFILE "            break;\n";
 
             $ffdcName = $err->{rc} . "_pcb_pib_rc";
@@ -215,8 +215,8 @@ foreach my $argnum (0 .. $#ARGV)
             $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
 
             print TGFILE "        case 0x$ffdcHash32Bit:\n";
-            print TGFILE "            uint32_t pibRc = be32toh(*(reinterpret_cast<const uint32_t *>(buf)));\n";
-            print TGFILE "            pelData.append(\"PIB RC\", pibRc);\n";
+            print TGFILE "            {uint32_t pibRc = be32toh(*(reinterpret_cast<const uint32_t *>(buf)));\n";
+            print TGFILE "            pelData.append(\"PIB RC\", pibRc);}\n";
             print TGFILE "            break;\n";
         }
         foreach my $ffdc (@{$err->{ffdc}})
