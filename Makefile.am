@@ -67,6 +67,7 @@ ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_adu_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_block_wakeup_intr_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_clock_test_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_determine_eco_mode_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_do_fw_hb_istep.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_extract_sbe_rc_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_fbc_core_topo_errors.xml \
@@ -91,8 +92,15 @@ ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_hcd_powerbus_purge.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_init_done_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_init_start_ppe_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_iohs_poll_recal_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_lib_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_load_ppe_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_power_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_io_tdr_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_iohs_reset.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_l3_flush_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_load_iop_xram_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_omi_reset_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_pba_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_perv_sbe_cmn_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_pm_ocb_indir_access_errors.xml \
@@ -103,22 +111,33 @@ ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_ram_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_read_write_iop_xram_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_check_quiesce_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_init_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_pll_initf_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_chiplet_pll_setup_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_common_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_core_spr_setup_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_exit_cache_contained_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_fabricinit_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_i2c_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_load_bootloader_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_lpc_init_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_mcs_setup_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_npll_setup_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_plat_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_powerdown_backing_caches_error.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_rcs_setup_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_ring_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_scominit_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_scratch_regs_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_select_ex_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_spi_cmd_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_tp_chiplet_reset_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sbe_tracearray_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_scomt_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sim_model_boot_errors.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sim_post_chiplet_pll_setup.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sim_pre_chiplet_pll_setup.xml \
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_sim_pre_io.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_smp_link_firs_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_thread_control_errors.xml
