@@ -220,18 +220,18 @@ std::string plat_CalloutPriority_tostring(CalloutPriorities::CalloutPriority cal
 std::string plat_ProcedureCallout_tostring(ProcedureCallouts::ProcedureCallout procedurecallout)
 {
     // Initialize with "CODE" to return if unsupported enum is given
-    std::string procedurecalloutstr = "CODE";
+    std::string procedurecalloutstr = "BMC0001";
 
     switch(procedurecallout)
     {
         case ProcedureCallouts::ProcedureCallout::CODE:
-            procedurecalloutstr = "CODE";
+            procedurecalloutstr = "BMC0001";
             break;
         case ProcedureCallouts::ProcedureCallout::LVL_SUPPORT:
-            procedurecalloutstr = "LVL_SUPPORT";
+            procedurecalloutstr = "BMC0002";
             break;
         case ProcedureCallouts::ProcedureCallout::BUS_CALLOUT:
-            procedurecalloutstr = "BUS_CALLOUT";
+            procedurecalloutstr = "BMC0004";
             break;
         default:
             FAPI_ERR("Unsupported ProcedureCallout[%d[ for tostring\n", procedurecallout);
