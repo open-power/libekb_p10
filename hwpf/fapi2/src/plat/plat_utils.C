@@ -230,9 +230,6 @@ std::string plat_ProcedureCallout_tostring(ProcedureCallouts::ProcedureCallout p
         case ProcedureCallouts::ProcedureCallout::LVL_SUPPORT:
             procedurecalloutstr = "LVL_SUPPORT";
             break;
-        case ProcedureCallouts::ProcedureCallout::MEMORY_PLUGGING_ERROR:
-            procedurecalloutstr = "MEMORY_PLUGGING_ERROR";
-            break;
         case ProcedureCallouts::ProcedureCallout::BUS_CALLOUT:
             procedurecalloutstr = "BUS_CALLOUT";
             break;
