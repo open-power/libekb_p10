@@ -43,6 +43,9 @@ struct HWCallout
     // in POWER cec device tree
     std::vector<uint8_t> target_entity_path;
 
+    // To indicate, a planar callout is required for this error.
+    bool isPlanarCallout;
+
     // To get clock position and it used for identify clock position
     // for processor
     uint8_t clkPos;

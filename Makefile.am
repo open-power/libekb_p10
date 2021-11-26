@@ -166,6 +166,7 @@ HWPF_HEADER = \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_target.H \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_trace.H \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_utils.H \
+	$(srcdir)/hwpf/fapi2/include/plat/plat_error.H \
 	$(srcdir)/hwpf/fapi2/include/plat/plat_vpd_access.H \
 	$(srcdir)/hwpf/fapi2/include/plat/subroutine_executor.H \
 	$(srcdir)/hwpf/fapi2/include/plat/target.H \
@@ -236,6 +237,7 @@ libekb_la_SOURCES = $(PROCEDURES) \
 		    libekb.H \
 		    hwpf/fapi2/src/fapi2_utils.C \
 		    hwpf/fapi2/src/plat/plat_utils.C \
+		    hwpf/fapi2/src/plat/plat_error.C \
 		    hwpf/fapi2/src/plat/target.C \
 		    ekb/hwpf/fapi2/src/error_info.C \
 		    ekb/hwpf/fapi2/src/ffdc.C \

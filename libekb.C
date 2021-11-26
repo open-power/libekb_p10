@@ -10,6 +10,7 @@ extern "C" {
 
 #include "plat_trace.H"
 #include "plat_utils.H"
+#include "plat_error.H"
 #include "utils.H"
 #include <set_sbe_error.H>
 #include <error_info_defs.H>
@@ -115,6 +116,7 @@ static void get_HWPErrorInfo(const fapi2::ReturnCode& rc, HWP_ErrorInfo& hwp_err
     {
         HWCallout hwcallout_data;
         hwcallout_data.hwid = fapi2::plat_HwCalloutEnum_tostring(hwcallout->iv_hw);
+
         hwcallout_data.callout_priority =
             fapi2::plat_CalloutPriority_tostring(hwcallout->iv_calloutPriority);
         fapi2::getTgtEntityPath(hwcallout->iv_refTarget,
@@ -154,7 +156,6 @@ static void get_HWPErrorInfo(const fapi2::ReturnCode& rc, HWP_ErrorInfo& hwp_err
         hwp_errinfo.cdg_targets.push_back(cdg_tgt_data);
     }
 }
-
 
 /*
  * @brief Helper function to get hwp ffdc information .
@@ -201,6 +202,9 @@ void libekb_get_ffdc(FFDC& ffdc)
 	// Previous application called HWP return code
 	fapi2::ReturnCode rc =  fapi2::current_err;
 	libekb_get_ffdc_helper(ffdc, rc);
+	// For clock hwp error happened inside BMC context, the proc
+	// target has to be guarded
+	fapi2::process_HW_callout(ffdc, true);
 }
 
 void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc_index)
@@ -247,7 +251,7 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc
 		else {
 			ffdc_data.data = sbe_ffdc->data;
 		}
-                ffdc_endian.push_back(ffdc_data);
+		ffdc_endian.push_back(ffdc_data);
 	}
 
 	//Convert SBE Error FFDC to FAPI RC
@@ -256,4 +260,7 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc
 
 	//update ffdc structre based on new RC
 	libekb_get_ffdc_helper(ffdc, rc);
+	// For clock hwp error happened inside SBE context, the proc
+	// target should not to be guarded
+	fapi2::process_HW_callout(ffdc, false);
 }
