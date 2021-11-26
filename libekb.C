@@ -115,6 +115,7 @@ static void get_HWPErrorInfo(const fapi2::ReturnCode& rc, HWP_ErrorInfo& hwp_err
     {
         HWCallout hwcallout_data;
         hwcallout_data.hwid = fapi2::plat_HwCalloutEnum_tostring(hwcallout->iv_hw);
+
         hwcallout_data.callout_priority =
             fapi2::plat_CalloutPriority_tostring(hwcallout->iv_calloutPriority);
         fapi2::getTgtEntityPath(hwcallout->iv_refTarget,
@@ -155,6 +156,49 @@ static void get_HWPErrorInfo(const fapi2::ReturnCode& rc, HWP_ErrorInfo& hwp_err
     }
 }
 
+/*
+ * @brief Used to callout hardware error details.
+ *
+ * The defined api is used collect defined error info in error xml based on
+ * given hwp return code (error code)
+ *
+ * @param ffdc used to pass buffer to fill FFDC data
+ * @param hwp_errinfo used to pass buffer to fill error details
+ *
+ * @return void
+ */
+static void update_FFDCForClockFailure(FFDC &ffdc, bool isSbe)
+{
+	bool isClockError = false;
+	std::vector<uint8_t> refTargetEntityPath;
+
+	for (auto &hwcallout : ffdc.hwp_errorinfo.hwcallouts)
+	{
+		// only PROC_REF_CLOCK failure is expected in BMC context.
+		if (hwcallout.hwid == "PROC_REF_CLOCK")
+		{
+			hwcallout.isPlanarCallout = true;
+			isClockError = true;
+			refTargetEntityPath = hwcallout.target_entity_path;
+		}
+	}
+
+	// For clock hwp error happened inside BMC context, the proc
+	// target has to be guarded
+	if (isClockError && !isSbe)
+	{
+		for (auto &cdg : ffdc.hwp_errorinfo.cdg_targets)
+		{
+			if (cdg.target_entity_path == refTargetEntityPath)
+			{
+				cdg.deconfigure = true;
+				cdg.guard = true;
+				cdg.guard_type = fapi2::plat_GardTypeEnum_tostring(
+				    fapi2::GardTypes::GardType::GARD_Predictive);
+			}
+		}
+	}
+}
 
 /*
  * @brief Helper function to get hwp ffdc information .
@@ -201,6 +245,7 @@ void libekb_get_ffdc(FFDC& ffdc)
 	// Previous application called HWP return code
 	fapi2::ReturnCode rc =  fapi2::current_err;
 	libekb_get_ffdc_helper(ffdc, rc);
+	update_FFDCForClockFailure(ffdc, false);
 }
 
 void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc_index)
@@ -247,7 +292,7 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc
 		else {
 			ffdc_data.data = sbe_ffdc->data;
 		}
-                ffdc_endian.push_back(ffdc_data);
+		ffdc_endian.push_back(ffdc_data);
 	}
 
 	//Convert SBE Error FFDC to FAPI RC
@@ -256,4 +301,5 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc
 
 	//update ffdc structre based on new RC
 	libekb_get_ffdc_helper(ffdc, rc);
+	update_FFDCForClockFailure(ffdc, true);
 }

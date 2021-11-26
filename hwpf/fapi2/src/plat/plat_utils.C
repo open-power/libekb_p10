@@ -154,14 +154,8 @@ std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
         case HwCallouts::HwCallout::TOD_CLOCK:
             hwcalloutstr = "TOD_CLOCK";
             break;
-        case HwCallouts::HwCallout::MEM_REF_CLOCK:
-            hwcalloutstr = "MEM_REF_CLOCK";
-            break;
         case HwCallouts::HwCallout::PROC_REF_CLOCK:
             hwcalloutstr = "PROC_REF_CLOCK";
-            break;
-        case HwCallouts::HwCallout::PCI_REF_CLOCK:
-            hwcalloutstr = "PCI_REF_CLOCK";
             break;
         case HwCallouts::HwCallout::FLASH_CONTROLLER_PART:
             hwcalloutstr = "FLASH_CONTROLLER_PART";
