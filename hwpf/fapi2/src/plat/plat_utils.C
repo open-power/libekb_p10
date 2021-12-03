@@ -151,38 +151,8 @@ std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
 
     switch(hwcallout)
     {
-        case HwCallouts::HwCallout::TOD_CLOCK:
-            hwcalloutstr = "TOD_CLOCK";
-            break;
-        case HwCallouts::HwCallout::MEM_REF_CLOCK:
-            hwcalloutstr = "MEM_REF_CLOCK";
-            break;
         case HwCallouts::HwCallout::PROC_REF_CLOCK:
             hwcalloutstr = "PROC_REF_CLOCK";
-            break;
-        case HwCallouts::HwCallout::PCI_REF_CLOCK:
-            hwcalloutstr = "PCI_REF_CLOCK";
-            break;
-        case HwCallouts::HwCallout::FLASH_CONTROLLER_PART:
-            hwcalloutstr = "FLASH_CONTROLLER_PART";
-            break;
-        case HwCallouts::HwCallout::PNOR_PART:
-            hwcalloutstr = "PNOR_PART";
-            break;
-        case HwCallouts::HwCallout::SBE_SEEPROM_PART:
-            hwcalloutstr = "SBE_SEEPROM_PART";
-            break;
-        case HwCallouts::HwCallout::VPD_PART:
-            hwcalloutstr = "VPD_PART";
-            break;
-        case HwCallouts::HwCallout::LPC_SLAVE_PART:
-            hwcalloutstr = "LPC_SLAVE_PART";
-            break;
-        case HwCallouts::HwCallout::GPIO_EXPANDER_PART:
-            hwcalloutstr = "GPIO_EXPANDER_PART";
-            break;
-        case HwCallouts::HwCallout::SPIVID_SLAVE_PART:
-            hwcalloutstr = "SPIVID_SLAVE_PART";
             break;
         default:
             FAPI_ERR("Unsupported HwCalloutEnum[%d] for tostring\n", hwcallout);
