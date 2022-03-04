@@ -73,6 +73,9 @@ constexpr uint64_t PLAT_TARGET_FILTER_EQ5         = (BIT0 >> 37);  // Pervasive 
 constexpr uint64_t PLAT_TARGET_FILTER_EQ6         = (BIT0 >> 38);  // Pervasive 38
 constexpr uint64_t PLAT_TARGET_FILTER_EQ7         = (BIT0 >> 39);  // Pervasive 39
 
+// placeholder for recent hwp changes compile in pub-ekb, will fix with full support later
+constexpr uint64_t PLAT_TARGET_FILTER_MC = 0xFFFFFFFFFFFFFFFF;
+
 } // namespace PlatTargetFilter
 
 } // namespace fapi2
