@@ -217,6 +217,7 @@ LOCALCXXFLAGS = $(OPTFLAGS) -Wall -std=gnu++11 \
 		-I$(srcdir)/ekb/chips/p10/procedures/hwp/ffdc \
 		-I$(srcdir)/ekb/chips/common/utils/scomt \
 		-I$(srcdir)/ekb/chips/ocmb/explorer/common/include \
+		-I$(srcdir)/ekb/chips/ocmb/odyssey/common/include \
 		$(PROC_INCLUDE_CFLAGS)
 
 lib_LTLIBRARIES = libekb.la
