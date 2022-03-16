@@ -203,7 +203,7 @@ void libekb_get_ffdc(FFDC& ffdc)
 	fapi2::ReturnCode rc =  fapi2::current_err;
 	libekb_get_ffdc_helper(ffdc, rc);
 	// For clock hwp error happened inside BMC context, the proc
-	// target has to be guarded
+	// target has to be deconfigured
 	fapi2::process_HW_callout(ffdc, true);
 }
 
@@ -261,6 +261,6 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt, int proc
 	//update ffdc structre based on new RC
 	libekb_get_ffdc_helper(ffdc, rc);
 	// For clock hwp error happened inside SBE context, the proc
-	// target should not to be guarded
+	// target should not to be deconfigured
 	fapi2::process_HW_callout(ffdc, false);
 }

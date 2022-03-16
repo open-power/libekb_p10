@@ -11,20 +11,20 @@ namespace fapi2
  *
  * @param[in,out] ffdc        ffdc data which need to be updated if it is clock failure
  * @param[in,out] hwCallout   reference of hwcallout with clock related hwid
- * @param[in] guardRefTarget  indicates whether reference target need to be guarded or not
+ * @param[in] deconfRefTarget indicates whether reference target need to be deconfigured or not
  *
  * @return void
  */
-static void process_clock_callout(FFDC &ffdc, HWCallout& hwCallout, const bool guardRefTarget)
+static void process_clock_callout(FFDC &ffdc, HWCallout& hwCallout, const bool deconfRefTarget)
 {
 	// Planar callout is required since, clock is not a FRU, its parent has
 	// to be called out, and clock targets parent is Planar.
 	hwCallout.isPlanarCallout = true;
 
 	// This is an override to CDG defined in error xml. We cant add this guard
-	// in xml, since xml is comon for other systems also, where guard is not
+	// in xml, since xml is comon for other systems also, where deconfigured is not
 	// required.
-	if (guardRefTarget)
+	if (deconfRefTarget)
 	{
 		// For clock failures, reference target is always expected in cdg
 		// for callout. If it is not there, which means, this guard is not
@@ -34,22 +34,22 @@ static void process_clock_callout(FFDC &ffdc, HWCallout& hwCallout, const bool g
 			if (cdg.target_entity_path == hwCallout.target_entity_path)
 			{
 				cdg.deconfigure = true;
-				cdg.guard = true;
+				cdg.guard = false;
 				cdg.guard_type = plat_GardTypeEnum_tostring(
-					GardTypes::GardType::GARD_Predictive);
+					GardTypes::GardType::GARD_NULL);
 			}
 		}
 	}
 }
 
-void process_HW_callout(FFDC &ffdc, const bool guardRefTarget)
+void process_HW_callout(FFDC &ffdc, const bool deconfRefTarget)
 {
 	for (auto &hwcallout : ffdc.hwp_errorinfo.hwcallouts)
 	{
 		// only PROC_REF_CLOCK failure is expected in BMC context.
 		if (hwcallout.hwid == "PROC_REF_CLOCK")
 		{
-			process_clock_callout(ffdc, hwcallout, guardRefTarget);
+			process_clock_callout(ffdc, hwcallout, deconfRefTarget);
 		}
 	}
 }

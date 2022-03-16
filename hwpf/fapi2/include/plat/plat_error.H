@@ -13,11 +13,11 @@ namespace fapi2
  * specific to each failures with hwcallout
  *
  * @param[in,out] ffdc ffdc data which need to be updated if it is clock failure
- * @param[in] guardRefTarget indicates whether reference target need to be guarded or not
+ * @param[in] deconfRefTarget indicates whether reference target need to be deconfigured or not
  *
  * @return void
  */
-void process_HW_callout(FFDC &ffdc, const bool guardRefTarget);
+void process_HW_callout(FFDC &ffdc, const bool deconfRefTarget);
 }
 
 #endif
