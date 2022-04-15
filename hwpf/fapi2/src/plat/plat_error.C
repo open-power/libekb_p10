@@ -46,8 +46,9 @@ void process_HW_callout(FFDC &ffdc, const bool deconfRefTarget)
 {
 	for (auto &hwcallout : ffdc.hwp_errorinfo.hwcallouts)
 	{
-		// only PROC_REF_CLOCK failure is expected in BMC context.
-		if (hwcallout.hwid == "PROC_REF_CLOCK")
+		// only PROC_REF_CLOCK & PCI_REF_CLOCK failure is expected in BMC context.
+		if ((hwcallout.hwid == "PROC_REF_CLOCK") ||
+			(hwcallout.hwid == "PCI_REF_CLOCK"))
 		{
 			process_clock_callout(ffdc, hwcallout, deconfRefTarget);
 		}

@@ -154,6 +154,9 @@ std::string plat_HwCalloutEnum_tostring(HwCallouts::HwCallout hwcallout)
         case HwCallouts::HwCallout::PROC_REF_CLOCK:
             hwcalloutstr = "PROC_REF_CLOCK";
             break;
+        case HwCallouts::HwCallout::PCI_REF_CLOCK:
+            hwcalloutstr = "PCI_REF_CLOCK";
+            break;
         default:
             FAPI_ERR("Unsupported HwCalloutEnum[%d] for tostring\n", hwcallout);
             break;
