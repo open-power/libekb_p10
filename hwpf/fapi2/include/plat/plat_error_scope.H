@@ -25,18 +25,18 @@
 #define __FAPI2_PLAT_ERROR_SCOPE__
 
 /// @cond
-#define PLAT_FAPI_TRY_NO_TRACE( __operation__ )                         \
-    if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
-    {                                                                   \
-        goto fapi_try_exit;                                             \
-    }
+#define PLAT_FAPI_TRY_NO_TRACE(__operation__)                                  \
+	if ((fapi2::current_err = (__operation__)) !=                          \
+	    fapi2::FAPI2_RC_SUCCESS) {                                         \
+		goto fapi_try_exit;                                            \
+	}
 
-#define PLAT_FAPI_TRY_TRACE( __operation__, ... )                       \
-    if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
-    {                                                                   \
-        FAPI_ERR(__VA_ARGS__);                                          \
-        goto fapi_try_exit;                                             \
-    }
+#define PLAT_FAPI_TRY_TRACE(__operation__, ...)                                \
+	if ((fapi2::current_err = (__operation__)) !=                          \
+	    fapi2::FAPI2_RC_SUCCESS) {                                         \
+		FAPI_ERR(__VA_ARGS__);                                         \
+		goto fapi_try_exit;                                            \
+	}
 
 ///
 /// @brief Assert a conditional is true.
@@ -46,13 +46,12 @@
 /// @param[in] __ffdc__ the FFDC gathering function
 /// @param[in] ... varargs, as input to FAPI_ERR
 ///
-#define PLAT_FAPI_ASSERT( __conditional__, __ffdc__, ... )      \
-    if (! (__conditional__))                                    \
-    {                                                           \
-        (__ffdc__).execute();                                   \
-        FAPI_ERR(__VA_ARGS__);                                  \
-        goto fapi_try_exit;                                     \
-    }
+#define PLAT_FAPI_ASSERT(__conditional__, __ffdc__, ...)                       \
+	if (!(__conditional__)) {                                              \
+		(__ffdc__).execute();                                          \
+		FAPI_ERR(__VA_ARGS__);                                         \
+		goto fapi_try_exit;                                            \
+	}
 
 ///
 /// @brief Create an error log based on __conditional__,
@@ -70,14 +69,11 @@
 ///        the __conditional__ test does not cause a branch to fapi_try_exit
 ///
 ///
-#define PLAT_FAPI_ASSERT_NOEXIT( __conditional__, __ffdc__, ... )   \
-    if (! (__conditional__))                                        \
-    {                                                               \
-        __ffdc__.execute(                                           \
-                fapi2::FAPI2_ERRL_SEV_UNDEFINED, true);             \
-        FAPI_ERR(__VA_ARGS__); \
-    }
+#define PLAT_FAPI_ASSERT_NOEXIT(__conditional__, __ffdc__, ...)                \
+	if (!(__conditional__)) {                                              \
+		__ffdc__.execute(fapi2::FAPI2_ERRL_SEV_UNDEFINED, true);       \
+		FAPI_ERR(__VA_ARGS__);                                         \
+	}
 /// @endcond
-
 
 #endif

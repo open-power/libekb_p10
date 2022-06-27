@@ -33,7 +33,7 @@
 //
 namespace fapi2
 {
-	typedef struct pdbg_target *plat_target_handle_t;
+typedef struct pdbg_target *plat_target_handle_t;
 }
 
 #endif

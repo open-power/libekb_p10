@@ -29,9 +29,9 @@
 #ifndef FAPI2_PLATTRACE_H_
 #define FAPI2_PLATTRACE_H_
 
-#include <stdio.h>
-#include <stdint.h>
 #include <libekb.H>
+#include <stdint.h>
+#include <stdio.h>
 
 // Why not a #define, why is this in the fapi2 namespace?
 // To prevent problems with Cronus and the fapi1 definitions.
@@ -48,27 +48,33 @@ static const uint32_t MAX_ECMD_STRING_LEN = 64;
 #define TRACE_FORMAT_SPEC(LOC, _fmt_) LOC _fmt_ "\n"
 
 // Information traces (go into fast trace buffer that can wrap often)
-#define FAPI_TRACE(_level_, _id_, _fmt_, _args_...)                              \
-    libekb_log(_level_, TRACE_FORMAT_SPEC(TRACE_LOC_FORMAT_SPEC, _fmt_),         \
-               _id_, __func__, __LINE__, ##_args_);
+#define FAPI_TRACE(_level_, _id_, _fmt_, _args_...)                            \
+	libekb_log(_level_, TRACE_FORMAT_SPEC(TRACE_LOC_FORMAT_SPEC, _fmt_),   \
+		   _id_, __func__, __LINE__, ##_args_);
 
-#define FAPI_INF(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_INF, "inf", _fmt_, ##_args_)
+#define FAPI_INF(_fmt_, _args_...)                                             \
+	FAPI_TRACE(LIBEKB_LOG_INF, "inf", _fmt_, ##_args_)
 
 // Important traces (go into slow trace buffer that should not wrap often)
-#define FAPI_IMP(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_IMP, "imp", _fmt_, ##_args_)
+#define FAPI_IMP(_fmt_, _args_...)                                             \
+	FAPI_TRACE(LIBEKB_LOG_IMP, "imp", _fmt_, ##_args_)
 
 // Error traces (go into slow trace buffer that should not wrap often)
-#define FAPI_ERR(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_ERR, "err", _fmt_, ##_args_)
+#define FAPI_ERR(_fmt_, _args_...)                                             \
+	FAPI_TRACE(LIBEKB_LOG_ERR, "err", _fmt_, ##_args_)
 
 // Debug traces (go into fast trace buffer that can wrap often)
-#define FAPI_DBG(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_DBG, "dbg", _fmt_, ##_args_)
+#define FAPI_DBG(_fmt_, _args_...)                                             \
+	FAPI_TRACE(LIBEKB_LOG_DBG, "dbg", _fmt_, ##_args_)
 
 // Scan traces
-#define FAPI_SCAN(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_SCAN, "scan", _fmt_, ##_args_)
+#define FAPI_SCAN(_fmt_, _args_...)                                            \
+	FAPI_TRACE(LIBEKB_LOG_SCAN, "scan", _fmt_, ##_args_)
 
-#define FAPI_MFG(_fmt_, _args_...) FAPI_TRACE(LIBEKB_LOG_MFG, "mfg", _fmt_, ##_args_)
+#define FAPI_MFG(_fmt_, _args_...)                                             \
+	FAPI_TRACE(LIBEKB_LOG_MFG, "mfg", _fmt_, ##_args_)
 
-#define FAPI_LAB(__fmt_, _args_...) \
-    printf(_fmt_, ##_args_);    \
-    printf("\n")
+#define FAPI_LAB(__fmt_, _args_...)                                            \
+	printf(_fmt_, ##_args_);                                               \
+	printf("\n")
 #endif // FAPI2_PLATTRACE_H_

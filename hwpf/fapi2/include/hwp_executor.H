@@ -1,7 +1,6 @@
 #ifndef FAPI2_HWPEXECUTOR_H_
 #define FAPI2_HWPEXECUTOR_H_
 
-#define FAPI_PLAT_EXEC_HWP(RC, FUNC, ARGS...) \
-	RC = FUNC(ARGS)
+#define FAPI_PLAT_EXEC_HWP(RC, FUNC, ARGS...) RC = FUNC(ARGS)
 
 #endif

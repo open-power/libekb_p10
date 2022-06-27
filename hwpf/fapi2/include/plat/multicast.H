@@ -24,20 +24,20 @@
 namespace fapi2
 {
 
-template<MulticastType M, MulticastGroup G, typename V>
-template<MulticastType O, MulticastGroup N>
+template <MulticastType M, MulticastGroup G, typename V>
+template <MulticastType O, MulticastGroup N>
 inline void Multicast<M, G, V>::updateHandle(V& value)
 {
-    // platform update handle here if needed
+	// platform update handle here if needed
 }
 
-template<MulticastType M, MulticastGroup G, typename V>
+template <MulticastType M, MulticastGroup G, typename V>
 inline bool Multicast<M, G, V>::isMulticast() const
 {
-    // platform update handle here if needed
-    return false;
+	// platform update handle here if needed
+	return false;
 }
 
-}
+} // namespace fapi2
 
 #endif
