@@ -4,6 +4,52 @@
 namespace fapi2
 {
 /**
+ *  @brief Function to check clock redundant mode is enabled in the system
+ *
+ *  Redundant mode is enabled, if the functional clock targets is greater than
+ *  one in the system. Default behaviour is redundant mode disabled.
+ *  Any internal failures during this function execution results redundant
+ *  mode as disabled.
+ *
+ *  return true if clock redundant mode is enabled, false otherwise
+ */
+bool clock_redundancy_is_enabled()
+{
+	auto constexpr NUM_CLOCK_FOR_REDUNDANT_MODE = 2;
+
+	struct pdbg_target *clock_target;
+	uint8_t clock_count = 0;
+	uint8_t buf[5];
+	pdbg_for_each_class_target("oscrefclk", clock_target)
+	{
+		if (!pdbg_target_get_attribute_packed(
+			clock_target, "ATTR_HWAS_STATE", "41", 1, buf)) {
+			FAPI_ERR("Can not read(%s) ATTR_HWAS_STATE attribute",
+				 pdbg_target_path(clock_target));
+			continue;
+		}
+		// isFuntional bit is stored in 4th byte and bit 3 position
+		// in HWAS_STATE
+		if (buf[4] & 0x20)
+			clock_count++;
+	}
+
+	if (clock_count != 1 && clock_count != 2) {
+		FAPI_ERR("Invalid number (%d) of clock target found",
+			 clock_count);
+		return false;
+	}
+
+	if (clock_count == NUM_CLOCK_FOR_REDUNDANT_MODE) {
+		FAPI_INF("Clock redundant mode(%d) enabled", clock_count);
+		return true;
+	}
+
+	FAPI_INF("Clock redundant mode(%d) disabled", clock_count);
+	return false;
+}
+
+/**
  * @brief Used to special handling of clock errors.
  *
  * The defined api is used to modify the callout and guard info
