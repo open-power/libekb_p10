@@ -134,7 +134,10 @@ enum FFDC_TYPE {
 	FFDC_TYPE_UNSUPPORTED = 1,
 
 	// FFDC is created for hardware procedure failures
-	FFDC_TYPE_HWP = 2
+	FFDC_TYPE_HWP = 2,
+
+	// FFDC is created for spare clock failures need to log as informational
+	FFDC_TYPE_SPARE_CLOCK_INFO = 3
 };
 
 /*
