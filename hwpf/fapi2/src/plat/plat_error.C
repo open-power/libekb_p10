@@ -143,6 +143,12 @@ void clock_callout_info(FFDC &ffdc, HWCallout &hwCallout)
 static void process_clock_callout(FFDC &ffdc, HWCallout &hwCallout,
 				  const bool deconfRefTarget)
 {
+	// Check redundant mode is enabled.
+	if (clock_redundancy_is_enabled()) {
+		clock_callout_info(ffdc, hwCallout);
+		return;
+	}
+
 	// Planar callout is required since, clock is not a FRU, its
 	// parent has to be called out, and clock targets parent is
 	// Planar.
