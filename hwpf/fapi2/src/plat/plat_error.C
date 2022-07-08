@@ -1,8 +1,6 @@
 #include "plat_error.H"
 #include "plat_utils.H"
 
-#include <attributes_info.H>
-
 namespace fapi2
 {
 /**
@@ -97,13 +95,16 @@ void clock_callout_info(FFDC &ffdc, HWCallout &hwCallout)
 		return;
 	}
 
+	// These definitions copied from header file attribute_info.H
+	typedef uint8_t ATTR_PHYS_BIN_PATH_Type[21];
+	const std::string ATTR_PHYS_BIN_PATH_Spec = "1";
+	const uint32_t ATTR_PHYS_BIN_PATH_ElementCount = 21;
+
 	ATTR_PHYS_BIN_PATH_Type physBinPath;
-	uint32_t binPathElemCount =
-	    dtAttr::fapi2::ATTR_PHYS_BIN_PATH_ElementCount;
-	if (!pdbg_target_get_attribute(
-		clock_target, "ATTR_PHYS_BIN_PATH",
-		std::stoi(dtAttr::fapi2::ATTR_PHYS_BIN_PATH_Spec),
-		binPathElemCount, physBinPath)) {
+	if (!pdbg_target_get_attribute(clock_target, "ATTR_PHYS_BIN_PATH",
+				       std::stoi(ATTR_PHYS_BIN_PATH_Spec),
+				       ATTR_PHYS_BIN_PATH_ElementCount,
+				       physBinPath)) {
 		FAPI_ERR("Failed to read ATTR_PHYS_BIN_PATH for target %s\n",
 			 pdbg_target_path(clock_target));
 		return;
@@ -114,7 +115,7 @@ void clock_callout_info(FFDC &ffdc, HWCallout &hwCallout)
 
 	// Rebuild cdg records based redudant mode enabled policy.
 	CDG_Target cdg_target;
-	std::copy(physBinPath, physBinPath + binPathElemCount,
+	std::copy(physBinPath, physBinPath + ATTR_PHYS_BIN_PATH_ElementCount,
 		  std::back_inserter(cdg_target.target_entity_path));
 	cdg_target.deconfigure = true;
 	cdg_target.guard = false;
