@@ -1,4 +1,4 @@
-AC_INIT([libekb], [1.2])
+AC_INIT([libekb],[1.2])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_MACRO_DIR([m4])
@@ -37,7 +37,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_AS
 AM_PROG_AR
-AC_PROG_LIBTOOL
+LT_INIT
 AC_CHECK_TOOL([OBJCOPY],[objcopy])
 
 AC_CHECK_LIB([pdbg], [pdbg_targets_init], [LIBS="-lpdbg -lfdt $LIBS"], [], [-lfdt])
