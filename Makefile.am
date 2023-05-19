@@ -35,7 +35,7 @@ ATTRIB_XML = \
 	$(EKB)/chips/p10/procedures/xml/attribute_info/p10_qme_attributes.xml \
 	$(EKB)/chips/p10/procedures/xml/attribute_info/p10_runn_attributes.xml \
 	$(EKB)/chips/p10/procedures/xml/attribute_info/p10_sbe_load_bootloader_attributes.xml \
-	$(EKB)/chips/p10/procedures/xml/attribute_info/p10_sbe_attributes.xml \ 
+	$(EKB)/chips/p10/procedures/xml/attribute_info/p10_sbe_attributes.xml \
 	$(EKB)/chips/p10/procedures/xml/attribute_info/pm_plat_attributes.xml
 
 
