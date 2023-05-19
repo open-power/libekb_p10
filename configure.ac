@@ -18,6 +18,9 @@ esac
 if test "$ARCH" = "x86_64" ; then
 	AC_MSG_NOTICE([Building on X86])
 	TARGET_ENDIAN="-DHAVE_LITTLE_ENDIAN"
+elif test "$ARCH" = "aarch64" ; then
+	AC_MSG_NOTICE([Building on ARM64])
+	TARGET_ENDIAN="-DHAVE_LITTLE_ENDIAN"
 elif test "$ARCH" = "arm" ; then
 	AC_MSG_NOTICE([Building on ARM])
 	TARGET_ENDIAN="-DHAVE_LITTLE_ENDIAN"
