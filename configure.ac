@@ -31,7 +31,11 @@ else
 	AC_MSG_ERROR([libekb cannot be built on $ARCH platform])
 fi
 AC_SUBST([TARGET_ENDIAN])
-AM_CONDITIONAL([BUILD_DB], [test x"$ARCH" != "xarm"])
+
+AC_ARG_ENABLE([db-install],
+	AS_HELP_STRING([--enable-db-install],
+		       [Enable installation of attribute database]))
+AM_CONDITIONAL([BUILD_DB], [test "x$enable_db_install" = "xyes"])
 
 AC_PROG_CC
 AC_PROG_CXX
