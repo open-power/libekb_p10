@@ -199,4 +199,7 @@ void libekb_get_ffdc(FFDC &ffdc);
 void libekb_get_sbe_ffdc(FFDC &ffdc, const sbeFfdcPacketType &pkt,
 			 int proc_index);
 
+[[nodiscard]] bool libekb_get_sbe_ffdc_via_switch_backend(
+    const uint32_t failingUnitId, FFDC &ffdc, struct pdbg_target *&proc);
+
 #endif /* __LIBEKB_H__ */
