@@ -227,17 +227,17 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt,
 	    reinterpret_cast<sbeFfdc_t*>(ffdc_pkt.ffdcData + 1);
 
 	// Get size of FFDC data in bytes. exculde RC size.
-	auto size = (ffdc_pkt.ffdcLengthInWords - 1) * sizeof(uint32_t);
+	size_t size = (ffdc_pkt.ffdcLengthInWords - 1) * sizeof(uint32_t);
 
 	// Create temporary sbeFfdc_t to store the data after endianess
 	// conversion.
 	std::vector<sbeFfdc_t> ffdc_endian;
 
 	// get size of sbeFfdc_t structre
-	auto sbe_ffdc_size = sizeof(sbeFfdc_t);
+	size_t sbe_ffdc_size = sizeof(sbeFfdc_t);
 
 	// endianess conversion.
-	for (auto i = 0; i < size; i += sbe_ffdc_size, sbe_ffdc++) {
+	for (size_t i = 0; i < size; i += sbe_ffdc_size, sbe_ffdc++) {
 		sbeFfdc_t ffdc_data;
 		ffdc_data.size = ntohl(sbe_ffdc->size);
 		// Special type FFDC size need endianess conversion in data.
