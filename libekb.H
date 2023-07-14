@@ -14,6 +14,7 @@
 
 extern "C" {
 #include <stdarg.h>
+#include <cstdint>
 
 typedef void (*libekb_log_func_t)(void *private_data, const char *fmt,
 				  va_list ap);

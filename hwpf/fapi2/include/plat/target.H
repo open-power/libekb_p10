@@ -446,7 +446,7 @@ inline void toString(const Target<T, M, V> &i_target, char *i_buffer,
 	if (!pdbg_target_get_attribute(target, "ATTR_FAPI_NAME", 1,
 				       fapiname_size, fapiname)) {
 		FAPI_ERR("Could not read ATTR_FAPI_NAME attribute");
-		snprintf(i_buffer, i_bsize, "Target 0x%lX/0x%.16lX/0x%X",
+		snprintf(i_buffer, i_bsize, "Target %p/0x%.16lX/0x%X",
 			 i_target.get(), T, M);
 	} else {
 		if (i_bsize < fapiname_size) {
