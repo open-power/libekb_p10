@@ -6,6 +6,7 @@ extern "C" {
 }
 
 #include "libekb.H"
+#include "p10_extract_sbe_rc.H"
 #include "plat_error.H"
 #include "plat_trace.H"
 #include "plat_utils.H"
@@ -18,6 +19,7 @@ extern "C" {
 #include <return_code.H>
 #include <set_sbe_error.H>
 
+#include <string>
 #include <vector>
 
 static libekb_log_func_t __libekb_log_fn;
@@ -263,4 +265,284 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt,
 	// For clock hwp error happened inside SBE context, the proc
 	// target should not to be deconfigured
 	fapi2::process_HW_callout(ffdc, false);
+}
+
+bool libekb_switch_pdbg_backend(const std::string& backendString)
+{
+	libekb_log(LIBEKB_LOG_INF,
+		   "Swarnendu-Debug-Msg: Entering libekb_switch_pdbg_backend");
+	if (backendString.empty()) {
+		libekb_log(LIBEKB_LOG_ERR,
+			   "Backend type is not provided for switching");
+		return false;
+	}
+	libekb_log(LIBEKB_LOG_INF,
+		   "Swarnendu-Debug-Msg: Switching backend to %s",
+		   backendString.c_str());
+
+	enum pdbg_backend backend;
+	if (("SBEFIFO" == backendString) || ("sbefifo" == backendString))
+		backend = pdbg_backend::PDBG_BACKEND_SBEFIFO;
+	else if (("KERNEL" == backendString) || ("kernel" == backendString))
+		backend = pdbg_backend::PDBG_BACKEND_KERNEL;
+	else if (("FSI" == backendString) || ("fsi" == backendString))
+		backend = pdbg_backend::PDBG_BACKEND_FSI;
+	else if (("I2C" == backendString) || ("i2c" == backendString))
+		backend = pdbg_backend::PDBG_BACKEND_I2C;
+	else
+		backend = pdbg_backend::PDBG_DEFAULT_BACKEND;
+
+	// First clear the existing dev tree
+	if (pdbg_target_root()) {
+		pdbg_release_dt_root();
+		/* libekb_log(LIBEKB_LOG_INF, "Swarnendu-Debug-Msg: Printing
+		targets for each target class after releasing device tree");
+		print_targets_for_each_target_class(); */
+	}
+
+	if (!pdbg_set_backend(backend, nullptr)) {
+		libekb_log(LIBEKB_LOG_ERR, "Can not set the backend to %s",
+			   backendString.c_str());
+		return false;
+	}
+
+	constexpr auto devtree =
+	    "/var/lib/phosphor-software-manager/pnor/rw/DEVTREE";
+	// PDBG_DTB environment variable set to CEC device tree path
+	if (setenv("PDBG_DTB", devtree, 1)) {
+		libekb_log(LIBEKB_LOG_ERR,
+			   "Failed to set PDBG_DTB. ErrNo: ", strerror(errno));
+		return false;
+	}
+
+	constexpr auto PDATA_INFODB_PATH =
+	    "/usr/share/pdata/attributes_info.db";
+	// PDATA_INFODB environment variable set to attributes tool  infodb path
+	if (setenv("PDATA_INFODB", PDATA_INFODB_PATH, 1)) {
+		libekb_log(
+		    LIBEKB_LOG_ERR,
+		    "Failed to set PDATA_INFODB: ErrNo: ", strerror(errno));
+		return false;
+	}
+
+	// initialize the targeting system
+	if (!pdbg_targets_init(nullptr)) {
+		libekb_log(LIBEKB_LOG_ERR, "pdbg_targets_init failed for %s",
+			   backendString.c_str());
+		return false;
+	}
+	auto root = pdbg_target_root();
+	if (!root) {
+		libekb_log(LIBEKB_LOG_ERR,
+			   "Root target can not be aquired after switching "
+			   "backend to %s",
+			   backendString.c_str());
+		return false;
+	}
+	pdbg_target_probe_all(root);
+	return true;
+}
+struct pdbg_target* getProcFromFailingId(const uint32_t failingUnit)
+{
+	struct pdbg_target* proc = nullptr;
+	pdbg_for_each_class_target("proc", proc)
+	{
+		if (pdbg_target_index(proc) == failingUnit)
+			break;
+	}
+	if (!proc)
+		libekb_log(LIBEKB_LOG_ERR,
+			   "No proc target found for failing unit = %d",
+			   failingUnit);
+
+	return proc;
+}
+
+bool probe_pib_n_fsi_targets(struct pdbg_target* proc)
+{
+	// PIB target for executing HWP
+	char path[16];
+	// Probe PIB for HWP execution
+	sprintf(path, "/proc%d/pib", pdbg_target_index(proc));
+	auto pib = pdbg_target_from_path(nullptr, path);
+	if (!pib) {
+		libekb_log(LIBEKB_LOG_ERR, "Failed to get PIB target for: ",
+			   pdbg_target_path(proc));
+		return false;
+	}
+	if (pdbg_target_probe(pib) != PDBG_TARGET_ENABLED) {
+		libekb_log(LIBEKB_LOG_ERR, "Failed to probe PIB target");
+		return false;
+	}
+
+	// Probe FSI for HWP execution
+	sprintf(path, "/proc%d/fsi", pdbg_target_index(proc));
+	auto fsi = pdbg_target_from_path(nullptr, path);
+	if (!fsi) {
+		libekb_log(LIBEKB_LOG_ERR, "Failed to get FIS target for: ",
+			   pdbg_target_path(proc));
+		return false;
+	}
+	if (pdbg_target_probe(fsi) != PDBG_TARGET_ENABLED) {
+		libekb_log(LIBEKB_LOG_ERR, "Failed to probe FSI target");
+		return false;
+	}
+	return true;
+}
+
+bool libekb_get_sbe_ffdc_via_switch_backend(const uint32_t failingUnitId,
+					    FFDC& ffdc,
+					    struct pdbg_target*& proc)
+{
+	const std::string prevBackend = "SBEFIFO";
+	const std::string newBackend = "KERNEL";
+
+	libekb_log(LIBEKB_LOG_INF, "Swarnendu-Debug-Msg: Entering "
+				   "libekb_get_sbe_ffdc_via_switch_backend");
+	/**
+	 * First switch the backend from SBEFIFO to KERNEL as if we are here
+	 * it means that the SEEPROM is in dead state and using the current
+	 * backend which is SBEFIFO by default won't yield anything for us
+	 */
+	if (!libekb_switch_pdbg_backend(newBackend)) {
+		libekb_log(LIBEKB_LOG_ERR,
+			   "Switching of PDBG backend to %s failed",
+			   newBackend.c_str());
+		// Try to revert the backend to SBEFIFO before returning.
+		auto revert = libekb_switch_pdbg_backend(prevBackend);
+		if (!revert) {
+			libekb_log(LIBEKB_LOG_ERR,
+				   "Reverting of PDBG backend to %s failed",
+				   prevBackend.c_str());
+			return revert;
+		} else {
+			proc = getProcFromFailingId(failingUnitId);
+			if (!proc) {
+				libekb_log(
+				    LIBEKB_LOG_ERR,
+				    "Can not aquire primary proc target after "
+				    "switching back the backned to %s",
+				    prevBackend.c_str());
+				return false;
+			}
+		}
+		return probe_pib_n_fsi_targets(proc);
+	}
+	// Find the proc target from the failing unit id
+	proc = getProcFromFailingId(failingUnitId);
+	if (!proc) {
+		// Try to revert the backend to SBEFIFO before returning.
+		auto revert = libekb_switch_pdbg_backend(prevBackend);
+		if (!revert) {
+			libekb_log(LIBEKB_LOG_ERR,
+				   "Reverting of PDBG backend to %s failed",
+				   prevBackend.c_str());
+			return revert;
+		} else {
+			proc = getProcFromFailingId(failingUnitId);
+			if (!proc) {
+				libekb_log(LIBEKB_LOG_ERR,
+					   "Can not aquire primary proc after "
+					   "switching back the backned to %s",
+					   prevBackend.c_str());
+				return false;
+			}
+		}
+		return probe_pib_n_fsi_targets(proc);
+	}
+
+	// Execute SBE extract rc to get the reason code for SEEPROM/SBE boot
+	// failure
+	P10_EXTRACT_SBE_RC::RETURN_ACTION recovAction;
+	// p10_extract_sbe_rc is returning the error along with
+	// recovery action, so not checking the fapirc.
+	auto fapiRc = p10_extract_sbe_rc(proc, recovAction, true);
+
+	switch (recovAction) {
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::ERROR_RECOVERED: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = ERROR_RECOVERED");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::NO_RECOVERY_ACTION: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = NO_RECOVERY_ACTION");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::RECONFIG_WITH_CLOCK_GARD: {
+		libekb_log(LIBEKB_LOG_INF, "P10_EXTRACT_SBE_RC::RETURN_ACTION "
+					   "= RECONFIG_WITH_CLOCK_GARD");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_BKP_BMSEEPROM: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = REIPL_BKP_BMSEEPROM");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_BKP_MSEEPROM: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = REIPL_BKP_MSEEPROM");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_UPD_MSEEPROM: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = REIPL_UPD_MSEEPROM");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_UPD_SEEPROM: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = REIPL_UPD_SEEPROM");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_UPD_SPI_CLK_DIV: {
+		libekb_log(LIBEKB_LOG_INF, "P10_EXTRACT_SBE_RC::RETURN_ACTION "
+					   "= REIPL_UPD_SPI_CLK_DIV");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::RESTART_CBS: {
+		libekb_log(LIBEKB_LOG_INF,
+			   "P10_EXTRACT_SBE_RC::RETURN_ACTION = RESTART_CBS");
+		break;
+	}
+	case P10_EXTRACT_SBE_RC::RETURN_ACTION::RESTART_SBE: {
+		libekb_log(LIBEKB_LOG_INF,
+			   "P10_EXTRACT_SBE_RC::RETURN_ACTION = RESTART_SBE");
+		break;
+	}
+	default: {
+		libekb_log(
+		    LIBEKB_LOG_INF,
+		    "P10_EXTRACT_SBE_RC::RETURN_ACTION = UNKNOWN_REASON_CODE");
+		break;
+	}
+	}
+	/**
+	 * Now switch the backend back to SBEFIFO from KERNEL i.e.; to it's
+	 * original state before returning
+	 */
+	if (!libekb_switch_pdbg_backend(prevBackend)) {
+		libekb_log(LIBEKB_LOG_ERR,
+			   "Switching of PDBG backend back to %s failed",
+			   prevBackend.c_str());
+		return false;
+	} else {
+		libekb_log(LIBEKB_LOG_INF,
+			   "Switching of PDBG backend back to %s successful",
+			   prevBackend.c_str());
+		proc = getProcFromFailingId(failingUnitId);
+		if (!proc) {
+			libekb_log(LIBEKB_LOG_ERR,
+				   "Failed to get proc for failing unit ID %d "
+				   "after switching back to %s",
+				   failingUnitId, prevBackend.c_str());
+			return false;
+		}
+	}
+	return probe_pib_n_fsi_targets(proc);
 }
