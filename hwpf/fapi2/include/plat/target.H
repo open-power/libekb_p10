@@ -523,7 +523,7 @@ inline Target<TARGET_TYPE_CHIPS>
 template <TargetType T>
 inline const char *getTargetClass()
 {
-	static_assert((T == TARGET_TYPE_PROC_CHIP),
+	static_assert((T == TARGET_TYPE_PROC_CHIP || T == TARGET_TYPE_MULTICAST_CHIP),
 		      " Target Type support not available");
 	return "proc";
 }
