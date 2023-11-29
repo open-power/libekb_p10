@@ -158,6 +158,25 @@ inline ReturnCode getScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
 	return FAPI2_RC_SUCCESS;
 }
 
+template <MulticastType M, typename V>
+inline ReturnCode getScom(const Target<TARGET_TYPE_OCMB_CHIP, M, V>& i_target,
+			  const uint64_t i_address, buffer<uint64_t>& o_data)
+{
+	struct pdbg_target *pib, *ocmb = i_target;
+	uint64_t data;
+	int rc;
+
+	if (!(pib = get_ody_pib_target(ocmb)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = pib_ody_read(pib, i_address, &data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	o_data = data;
+	return FAPI2_RC_SUCCESS;
+}
+
 /// @brief Platform-level implementation of putScom()
 /// @tparam K template parameter, passed in target.
 /// @param[in] i_target     HW target to operate on.
@@ -191,6 +210,24 @@ inline ReturnCode putScom(const Target<TARGET_TYPE_PROC_CHIP, M, V>& i_target,
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
 	rc = pib_write(pib, i_address, i_data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
+}
+
+template <MulticastType M, typename V>
+inline ReturnCode putScom(const Target<TARGET_TYPE_OCMB_CHIP, M, V>& i_target,
+				const uint64_t i_address,
+				const buffer<uint64_t> i_data)
+{
+	struct pdbg_target *pib, *ocmb = i_target;
+	int rc;
+
+	if (!(pib = get_ody_pib_target(ocmb)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = pib_ody_write(pib, i_address, i_data);
 	if (rc)
 		return FAPI2_RC_PLAT_ERR_SEE_DATA;
 
