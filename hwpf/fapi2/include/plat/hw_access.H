@@ -340,6 +340,34 @@ inline ReturnCode
 }
 
 ///
+/// @brief Platform-level implementation called by getCfamRegister()
+/// Hardware procedures writers will not call this function.
+/// @tparam K template parameter, passed in target.
+/// @param[in]  i_target   HW target to operate on.
+/// @param[in]  i_address  CFAM address to read from.
+/// @param[out] o_data     32-bit buffer that holds data read from HW target.
+/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template <MulticastType M, typename V>
+inline ReturnCode
+    getCfamRegister(const Target<TARGET_TYPE_OCMB_CHIP, M, V>& i_target,
+		    const uint32_t i_address, buffer<uint32_t>& o_data)
+{
+	struct pdbg_target *fsi, *ocmb = i_target;
+	uint32_t data;
+	int rc;
+
+	if (!(fsi = get_ody_fsi_target(ocmb)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = fsi_ody_read(fsi, i_address, &data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	o_data = data;
+	return FAPI2_RC_SUCCESS;
+}
+///
 /// @brief Platform-level implementation of putCfamRegister()
 /// Hardware procedures writers will not call this function.
 /// @tparam K template parameter, passed in target.
@@ -366,6 +394,32 @@ inline ReturnCode
 	return FAPI2_RC_SUCCESS;
 }
 
+///
+/// @brief Platform-level implementation of putCfamRegister()
+/// Hardware procedures writers will not call this function.
+/// @tparam K template parameter, passed in target.
+/// @param[in]  i_target   HW target to operate on.
+/// @param[in]  i_address  CFAM address to write to.
+/// @param[out] i_data     32-bit buffer that holds data to write into address.
+/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template <MulticastType M, typename V>
+inline ReturnCode
+    putCfamRegister(const Target<TARGET_TYPE_OCMB_CHIP, M, V>& i_target,
+		    const uint32_t i_address, const buffer<uint32_t> i_data)
+{
+	struct pdbg_target *fsi, *ocmb = i_target;
+	int rc;
+
+	if (!(fsi = get_ody_fsi_target(ocmb)))
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	rc = fsi_ody_write(fsi, i_address, i_data);
+	if (rc)
+		return FAPI2_RC_PLAT_ERR_SEE_DATA;
+
+	return FAPI2_RC_SUCCESS;
+}
 /// @brief Platform-level implementation  of putRing()
 /// Hardware procedures writers will not call this function.
 /// @tparam K template parameter, passed in target.
