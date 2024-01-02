@@ -50,7 +50,9 @@ $(ATTRIB_DIR)/platform_attrs.h: p10_attributes.db
 # Error info headers cannot be generated with parallel run
 .NOTPARALLEL:
 
-ERROR_INFO_XML = $(EKB)/chips/p10/procedures/xml/error_info/*.xml
+ERROR_INFO_XML = \
+	$(EKB)/chips/p10/procedures/xml/error_info/*.xml \
+	$(EKB)/chips/ocmb/odyssey/procedures/xml/error_info/*.xml
 ERROR_INFO_DIR = ./hwpf/fapi2/include/error_info
 ERROR_INFO_HEADER = \
 	$(ERROR_INFO_DIR)/hwp_ffdc_classes.H \
@@ -141,7 +143,9 @@ ERROR_PARSER_XML = \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_sim_pre_io.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_smp_link_firs_errors.xml \
 	$(EKB)/chips/p10/procedures/xml/error_info/p10_start_cbs_errors.xml \
-	$(EKB)/chips/p10/procedures/xml/error_info/p10_thread_control_errors.xml
+	$(EKB)/chips/p10/procedures/xml/error_info/p10_thread_control_errors.xml \
+	$(EKB)/chips/ocmb/odyssey/procedures/xml/error_info/ody_extract_sbe_rc_errors.xml \
+	$(EKB)/chips/ocmb/odyssey/procedures/xml/error_info/ody_sbe_common_errors.xml
 
 ERROR_PARSER_HEADER = \
 	$(ERROR_INFO_DIR)/platHwpErrParser.H \
