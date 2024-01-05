@@ -27,6 +27,7 @@ include ekb/chips/p10/procedures/hwp/lib/p10_ppe_state.mk
 include ekb/chips/p10/procedures/hwp/lib/p10_sbe_localreg_dump.mk
 include ekb/chips/ocmb/odyssey/procedures/hwp/utils/generic_utils.mk
 include ekb/chips/ocmb/odyssey/procedures/hwp/utils/ody_ppe_utils.mk
+include ekb/chips/ocmb/odyssey/procedures/hwp/utils/ody_ppe_state.mk
 
 # Procedure required for sbe hreset
 include ekb/chips/p10/procedures/hwp/perv/p10_sbe_hreset.mk
