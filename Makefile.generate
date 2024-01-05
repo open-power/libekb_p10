@@ -17,7 +17,8 @@ SLIST :=
 EKB_HLIST = \
 	$(shell find ekb/hwpf/fapi2/include -name '*.[Hh]' -print) \
 	$(shell find ekb/chips/common -name '*.[Hh]' -print) \
-	$(shell find ekb/chips/p10 -name '*.[Hh]' -print)
+	$(shell find ekb/chips/p10 -name '*.[Hh]' -print) \
+	$(shell find ekb/chips/ocmb -name '*.[Hh]' -print)
 
 define _ADD_MODULE_SRCDIR
 $(eval search_$(1) += $(2))
@@ -38,6 +39,7 @@ $(eval DLIST += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared)
 $(eval DLIST += $(ROOTPATH)/chips/p10/common/include)
 $(eval DLIST += $(ROOTPATH)/chips/p10/procedures/hwp/memory/lib)
 $(eval DLIST += $(ROOTPATH)/chips/p10/procedures/hwp/memory)
+$(eval DLIST += $(ROOTPATH)/chips/ocmb/odyssey/common/include)
 endef
 
 define __ADD_MODULE_INCDIRS
