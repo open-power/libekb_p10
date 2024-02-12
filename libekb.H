@@ -193,11 +193,11 @@ void libekb_get_ffdc(FFDC &ffdc);
  *
  * @param ffdc used to pass buffer to fill FFDC data
  * @param pkt  SBE FFDC packet
- * @param proc_index failing Processor pdbg index
+ * @param chipPos failing chip position
+ * @param chip_type type of the failing chip
  *
  * @retrun void
  */
-void libekb_get_sbe_ffdc(FFDC &ffdc, const sbeFfdcPacketType &pkt,
-			 int proc_index);
-
+void libekb_get_sbe_ffdc(FFDC &ffdc, const sbeFfdcPacketType &ffdc_pkt,
+			 int chipPos, uint32_t sbeChipType);
 #endif /* __LIBEKB_H__ */

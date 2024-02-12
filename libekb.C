@@ -205,14 +205,15 @@ void libekb_get_ffdc(FFDC& ffdc)
 }
 
 void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt,
-			 int proc_index)
+			 int chipPos, uint32_t sbeChipType)
 {
 	using namespace fapi2;
 	fapi2::ReturnCode rc;
 
 	libekb_log(LIBEKB_LOG_INF,
-		   "proc index: %d \t fapirc: 0x%x length: %d\n", proc_index,
-		   ffdc_pkt.fapiRc, ffdc_pkt.ffdcLengthInWords);
+		   "chip pos: %d  chip type 0x%08X  fapirc: 0x%x length: %d\n",
+		   chipPos, sbeChipType, ffdc_pkt.fapiRc,
+		   ffdc_pkt.ffdcLengthInWords);
 
 	if (!ffdc_pkt.ffdcLengthInWords) {
 		libekb_log(LIBEKB_LOG_ERR, "Empty sbe ffdc packet, Skipping\n");
@@ -255,7 +256,8 @@ void libekb_get_sbe_ffdc(FFDC& ffdc, const sbeFfdcPacketType& ffdc_pkt,
 	}
 
 	// Convert SBE Error FFDC to FAPI RC
-	FAPI_SET_SBE_ERROR(rc, ffdc_pkt.fapiRc, ffdc_endian.data(), proc_index);
+	FAPI_SET_SBE_ERROR(rc, ffdc_pkt.fapiRc, ffdc_endian.data(), chipPos,
+			   static_cast<uint64_t>(sbeChipType));
 	libekb_log(LIBEKB_LOG_INF, " New fapirc: 0x%x\n", rc);
 
 	// update ffdc structre based on new RC
