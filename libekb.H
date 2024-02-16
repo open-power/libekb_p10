@@ -162,12 +162,13 @@ struct FFDC {
 typedef struct sbeFfdcPacket {
 	uint32_t fapiRc;	    // Fapi Rc
 	uint32_t ffdcLengthInWords; // length of Fapi FFDC data
-	uint32_t *ffdcData;	    // fapi FFDC data
+	uint32_t *ffdcData = nullptr;	    // fapi FFDC data
 	~sbeFfdcPacket()
 	{
 		// freeup the ffdcData allocated memory
 		if (ffdcData) {
-			delete ffdcData;
+			delete[] ffdcData;
+			ffdcData = nullptr;
 		}
 	}
 } sbeFfdcPacketType;
