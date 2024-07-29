@@ -7,7 +7,7 @@ ignore_tags = ['description', 'platInit', 'writeable', 'overrideOnly',
                'persistRuntime', 'mssUnit', 'mssUnits', 'mssAccessorName',
                'odmVisable', 'odmChangeable', 'mssBlobStart', 'mssBlobLength',
                'privileged', 'platActionWrite', 'mrwHide', 'group', 'mrw',
-               'sbeAttrSync']
+               'sbeAttrSync', 'noSBEAccessor']
 
 data_types = ['uint8', 'uint16', 'uint32', 'uint64',
               'int8', 'int16', 'int32', 'int64']
