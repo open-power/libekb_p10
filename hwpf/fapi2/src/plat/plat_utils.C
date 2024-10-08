@@ -225,9 +225,6 @@ std::string plat_GardTypeEnum_tostring(GardTypes::GardType gardtype)
 	case GardTypes::GardType::GARD_NULL:
 		gardtypestr = "GARD_NULL";
 		break;
-	case GardTypes::GardType::GARD_Spare:
-		gardtypestr = "GARD_Spare";
-		break;
 	case GardTypes::GardType::GARD_User_Manual:
 		gardtypestr = "GARD_User_Manual";
 		break;
